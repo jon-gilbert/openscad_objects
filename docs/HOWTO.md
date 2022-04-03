@@ -189,6 +189,8 @@ include <object_common_functions.scad>
 
 Axle_attributes = ["diameter=i", "length=i"];
 function Axle(vlist=[], mutate=[]) = Object("Axle", Axle_attributes, vlist, mutate);
+function axle_length(axle, default, nv) = obj_accessor(axle, "length", default, nv);
+function axle_diameter(axle, default, nv) = obj_accessor(axle, "diameter", default, nv);
 
 module axle(axle) { 
     linear_extrude(axle_length(axle), center=true) circle(axle_diameter(axle)); 
