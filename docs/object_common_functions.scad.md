@@ -1064,8 +1064,8 @@ If there's no suitable element that can be returned, `_first()` returns undef.
     _first([undef, "a"]);       // Returns: "a"
     _first([0, 1]);             // Returns: 0         (because 0 is defined)
     _first([false, 1]);         // Returns: false     (because false is defined)
-    _first([[], "a"]);          // Returns: "a"       (because an empty list is undefined)
-    _first([undef, []]);        // Returns: undef     (because there is no valid, defined element)
+    _first([[]], "a"]);         // Returns: "a"       (because an empty list is undefined)
+    _first([undef, [[]]);       // Returns: undef     (because there is no valid, defined element)
 
 <br clear="all" /><br/>
 
