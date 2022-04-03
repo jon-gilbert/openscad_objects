@@ -848,8 +848,8 @@ function _defined(a) = (is_list(a)) ? len(a) > 0 : !is_undef(a);
 //   _first([undef, "a"]);       // Returns: "a"
 //   _first([0, 1]);             // Returns: 0         (because 0 is defined)
 //   _first([false, 1]);         // Returns: false     (because false is defined)
-//   _first([[], "a"]);          // Returns: "a"       (because an empty list is undefined)
-//   _first([undef, []]);        // Returns: undef     (because there is no valid, defined element)
+//   _first([[]], "a"]);         // Returns: "a"       (because an empty list is undefined)
+//   _first([undef, [[]]);       // Returns: undef     (because there is no valid, defined element)
 // See Also: _defined()
 function _first(list) = [for (i = list) if (_defined(i)) i][0];
 
