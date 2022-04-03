@@ -52,8 +52,8 @@ created later wouldn't have all the attributes built into it.
 
 Now we create a constructor: this is just a function that uses arguments passed to it to make a list we can pass around
 and use elsewhere. For example, in python you'd do something like `MyObj = MyClass()`; in perl, you'd do something 
-like `$obj = new MyClass();`; I understand in java you're probably just be better off farming goats or something?
-I'm unclear. Regardless, you've got to be able to create new instances of your OpenSCAD Axle. 
+like `$obj = new MyClass();`, and other languages vary in terms of complexity and syntax.
+Regardless, you've got to be able to create new instances of your OpenSCAD Axle. 
 `object_common_functions.scad` provides an `Object()` function for doing just this. Set it up in 
 your .scad file like this:
 

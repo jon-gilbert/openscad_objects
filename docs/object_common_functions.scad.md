@@ -2,11 +2,14 @@
 
 Functions for creating and accessing object-like lists.
 
-**Note:** that throughout this file and elsewhere within the 507 we loosely refer to things as
+**Note:** that throughout this file and elsewhere within the 507 (a separate project not yet linkable), we loosely refer to things as
 objects. I *wish* they were real, blessed, official capital-O Objects,
-and they're not. I try hard here and throughout to not reference
-object attributes directly by their list index position and instead use the Property Functions
-to get those properties, *and you should also.*
+and they're not. See docs/HOWTO.md on a quick-start minimum number of steps to get
+this into your OpenSCAD modules.
+
+Also, throughout the examples here we talk about an "Axle" model. This is described
+also in the HOWTO.md doc. It's loosely based on an actual object class in the 507,
+and used as a simple, contrived example.
 
 To use, add the following lines to the beginning of your file:
 
@@ -54,7 +57,7 @@ To use, add the following lines to the beginning of your file:
 
 ## Section: Object Functions
 
-These are the functions to assist the creating and usage of Object-like lists ("Objects").
+These functions assist the creating and usage of Object-like lists ("Objects").
 
 ### Function: Object()
 
