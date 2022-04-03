@@ -1,8 +1,13 @@
 
 testdir = tests
+docsdir = docs
 test_names = $(sort $(wildcard $(testdir)/test_*.scad))
+srcs = object_common_functions.scad
 
 all: test
+
+doc:
+	openscad-docsgen --force --gen-files --project-name "openscad_objects" --docs-dir $(docsdir) $(srcs)
 
 test:
 	for f in $(test_names); do \
