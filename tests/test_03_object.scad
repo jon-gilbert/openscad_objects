@@ -172,6 +172,15 @@ module test_obj_accessor() {
     
     wt4 = obj_accessor_unset(write_thing, "string");
     assert( obj_accessor(wt4, "string") == undef );
+
+    // specific test: setting a bool value to true at obj construction, 
+    // then flipping it to false via obj_accessor:
+    o2 = D(["boolean", true]);
+    assert( obj_accessor_get(o2, "boolean") == true );
+    o22 = obj_accessor(o2, "boolean", nv=false);
+    assert( obj_is_obj(o22), str( "return object is: ", o22 ) );
+    assert( obj_accessor_get(o22, "boolean") == false );
+
 }
 test_obj_accessor();
 

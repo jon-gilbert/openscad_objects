@@ -611,7 +611,7 @@ function obj_accessor(obj, name, default=undef, nv=undef) =
             : undef,
         id = obj_toc_attr_id_by_name(obj, name)
     )        
-    (nv) 
+    (_defined(nv))
         ? (id == 0)
             ? assert(false, str("obj_accessor(): ", obj_toc_get_type(obj), 
                 ": Can't use obj_accessor() to change the TOC."))
