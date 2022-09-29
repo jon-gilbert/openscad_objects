@@ -181,6 +181,12 @@ module test_obj_accessor() {
     assert( obj_is_obj(o22), str( "return object is: ", o22 ) );
     assert( obj_accessor_get(o22, "boolean") == false );
 
+    // test to see if we can successfully get back nothing with an undefined object
+    o6 = undef;
+    assert( obj_accessor(o6, "string", default="default") == "default" );
+    // this should error out, and there's no way in OpenSCAD to trap exceptions:
+    //assert( obj_accessor(o6, "string" ) == "undef" );
+
 }
 test_obj_accessor();
 

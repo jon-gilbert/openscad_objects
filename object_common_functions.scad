@@ -609,7 +609,7 @@ function obj_accessor(obj, name, default=undef, nv=undef) =
                 obj_toc_get_type(obj), ": both 'default' and 'nv' are specified for '", 
                 name, "', but only 'nv' takes effect."))
             : undef,
-        id = obj_toc_attr_id_by_name(obj, name)
+        id = (_defined(obj) && _defined(name)) ? obj_toc_attr_id_by_name(obj, name) : undef
     )        
     (_defined(nv))
         ? (id == 0)
@@ -619,7 +619,9 @@ function obj_accessor(obj, name, default=undef, nv=undef) =
                 ? list_set(obj, id, nv)
                 : assert(false, str("obj_accessor(): new value for '", name, 
                     "' doesn't match that attribute's type of '"))
-        : _first([obj[id], default]);
+        : (!_defined(id))
+            ? default
+            : _first([obj[id], default]);
 
 
 // Function: obj_accessor_get()
