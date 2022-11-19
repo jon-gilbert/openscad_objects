@@ -41,6 +41,7 @@ To use, add the following lines to the beginning of your file:
     - [`attr_and_type_from_string_or_pairs()`](#function-attr_and_type_from_string_or_pairs)
     - [`obj_get_values()`](#function-obj_get_values)
     - [`obj_has_value()`](#function-obj_has_value)
+    - [`obj_has()`](#function-obj_has)
     - [`obj_accessor()`](#function-obj_accessor)
     - [`obj_accessor_get()`](#function-obj_accessor_get)
     - [`obj_accessor_set()`](#function-obj_accessor_set)
@@ -659,6 +660,53 @@ won't use those accessors here, and unset attribute values will be considered un
 
 ---
 
+### Function: obj\_has()
+
+**Usage:** 
+
+- bool = obj\_has(obj, name);
+
+**Description:** 
+
+Given an object `obj` and an accessor name `name`, return `true` if the object "can" access
+that name, or `false` otherwise. An object need not have a specified value for the given name,
+only the ability to access and refer to it; in other words, if the `name` exists in the Object's
+TOC, then `obj_has()` will return true.
+
+Essentially, this is a thinly wrapped `obj_toc_get_attr_names()`.
+
+This might seem similar way to perl5's `can()` or python's `callable()`, but this is inaccurate:
+`obj_has()` cannot test if the object is able to execute or call the given `name`; it can only
+tell if the object has the given `name` as an attribute. The perl5 `exists()` or python `hasattr()`
+functions would be more analagous to `obj_has()`.
+
+**Arguments:** 
+
+<abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
+-------------------- | ------------
+`obj`                | An Object list. No default.
+`name`               | A string that may exist as an attribute for the Object. No default.
+
+**Example 1:** 
+
+    include <object_common_functions.scad>
+    axle = Axle([["diameter", 10], ["length", 30]]);
+    b = obj_has(axle, "diameter");
+    // b == true
+
+<br clear="all" /><br/>
+
+**Example 2:** 
+
+    include <object_common_functions.scad>
+    axle = Axle([["diameter", 10], ["length", 30]]);
+    b = obj_has(axle, "radius");
+    // b == false
+
+<br clear="all" /><br/>
+
+---
+
 ## Subsection: Object Base Accessors
 
 The attribute accessors. There's one mutatable accessor, `obj_accessor()`, that
@@ -1003,7 +1051,7 @@ they're prefixed with an underscore (`_`), but otherwise are direct copies.
 
 The remainder of the functions that this LibFile relies on are present in
 BOSL2, all from the set of functions that make managing lists in OpenSCAD easier. They are:
-`flatten()`, `list_insert()`, `list_pad()`, `list_set()`, `list_shape()`, and `list_to_matrix()`.
+`flatten()`, `in_list()`, `list_insert()`, `list_pad()`, `list_set()`, `list_shape()`, and `list_to_matrix()`.
 
 ### Function: \_defined()
 
