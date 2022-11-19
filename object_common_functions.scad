@@ -526,6 +526,34 @@ function obj_get_values(obj) = slice(obj, 1);
 function obj_has_value(obj) = (_defined_len(obj_get_values(obj)) > 0) ? true : false;
 
 
+// Function: obj_has()
+// Description:
+//   Given an object `obj` and an accessor name `name`, return `true` if the object "can" access 
+//   that name, or `false` otherwise. An object need not have a specified value for the given name, 
+//   only the ability to access and refer to it; in other words, if the `name` exists in the Object's 
+//   TOC, then `obj_has()` will return true. 
+//   .
+//   Essentially, this is a thinly wrapped `obj_toc_get_attr_names()`.
+//   .
+//   This might seem similar way to perl5's `can()` or python's `callable()`, but this is inaccurate: 
+//   `obj_has()` cannot test if the object is able to execute or call the given `name`; it can only 
+//   tell if the object has the given `name` as an attribute. The perl5 `exists()` or python `hasattr()` 
+//   functions would be more analagous to `obj_has()`. 
+// Usage:
+//   bool = obj_has(obj, name);
+// Arguments:
+//   obj = An Object list. No default.
+//   name = A string that may exist as an attribute for the Object. No default.
+// Example:
+//   axle = Axle([["diameter", 10], ["length", 30]]);
+//   b = obj_has(axle, "diameter");
+//   // b == true
+// Example:
+//   axle = Axle([["diameter", 10], ["length", 30]]);
+//   b = obj_has(axle, "radius");
+//   // b == false
+function obj_has(obj, name) = in_list(name, obj_toc_get_attr_names(obj));
+
 
 // Subsection: Object Base Accessors
 //   The attribute accessors. There's one mutatable accessor, `obj_accessor()`, that 
@@ -813,7 +841,7 @@ function obj_type_check_value(obj, name, value) =
 //   . 
 //   The remainder of the functions that this LibFile relies on are present in 
 //   BOSL2, all from the set of functions that make managing lists in OpenSCAD easier. They are:
-//   `flatten()`, `list_insert()`, `list_pad()`, `list_set()`, `list_shape()`, and `list_to_matrix()`.
+//   `flatten()`, `in_list()`, `list_insert()`, `list_pad()`, `list_set()`, `list_shape()`, and `list_to_matrix()`.
 // 
 // Function: _defined()
 // Description:

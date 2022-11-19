@@ -213,6 +213,20 @@ module test_obj_tocs() {
     assert( obj_toc_get_attr_type_by_name(obj, "list") == "l" );
     assert( obj_toc_get_attr_type_by_name(obj, "undefined") == "u" );
     assert( obj_toc_get_attr_type_by_name(obj, "object") == "o" );
+
+    assert( obj_has(obj, "string") == true );
+    assert( obj_has(obj, "integer") == true );
+    assert( obj_has(obj, "boolean") == true );
+    assert( obj_has(obj, "list") == true );
+    assert( obj_has(obj, "undefined") == true );
+    assert( obj_has(obj, "object") == true );
+    assert( obj_has(obj, "none") == false );
+    assert( obj_has(obj, undef) == false );
+    assert( obj_has(obj, "") == false );
+    assert( obj_has(obj, []) == false );
+    assert( obj_has(obj, true) == false );
+    assert( obj_has(obj, false) == false );
+
 }
 test_obj_tocs();
 
