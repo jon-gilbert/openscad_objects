@@ -146,7 +146,7 @@ function obj_is_obj(obj) =
     (is_list(obj))                                          // "Object base type must be a list")
         && (_defined(obj[0]))                               // "First element in object list must be defined"
         && (len(obj[0]) == len(obj))                        // "Objects must have the same number of elements and attributes in its TOC")
-        && (list_shape(list_tail(obj_toc_get_attributes(obj), 1), 1) == 2);  // "Attributes and type pairing within the TOC must be consistent, and must be 2")
+        && (list_shape(list_tail(obj_toc_get_attributes(obj), 1), 1) == 3);  // "Attributes and type pairing within the TOC must be consistent, and must be 2")
 
 
 // Function: obj_is_valid()
@@ -225,7 +225,7 @@ function obj_build_toc(obj_name, obj_attrs, mutate) =
     assert(_defined(obj_attrs) || _defined(mutate), 
         "obj_build_toc: at least one of either obj_attrs or mutate must be provided")
     let(
-        toc_attrs_with_type = [ for ( i=[0:len(obj_attrs) - 1] ) attr_and_type_from_string_or_pairs(obj_attrs[i]) ],
+        toc_attrs_with_type = [ for ( i=[0:len(obj_attrs) - 1] ) attr_type_default_from_string_or_pairs(obj_attrs[i]) ],
         new_toc = list_insert(toc_attrs_with_type, [0], [obj_name])
     )
     (obj_is_obj(mutate)) ? obj_toc(mutate) : new_toc;
@@ -299,7 +299,7 @@ function obj_toc_get_attr_names(obj) = [ for (i=obj_toc_get_attributes(obj)) i[0
 // Function: obj_toc_get_attr_types()
 // Description:
 //   Given an object, return its list of attribute types. Types are 
-//   returned in the same order and index as their corresponding attributes.. 
+//   returned in the same order and index as their corresponding attributes. 
 // Usage:
 //   obj_toc_get_attr_types(obj);
 // Arguments:
@@ -311,6 +311,23 @@ function obj_toc_get_attr_names(obj) = [ for (i=obj_toc_get_attributes(obj)) i[0
 // Todo: 
 //   honestly I'm not even really sure *when* you'd use this.
 function obj_toc_get_attr_types(obj) = [ for (i=obj_toc_get_attributes(obj)) i[1] ];
+
+
+// Function: obj_toc_get_attr_defaults()
+// Description: 
+//   Given an object, return its list of attribute default values. Default values are 
+//   returned in the same order and index as their corresponding attribute names.
+// Usage:
+//   obj_toc_get_attr_defaults(obj);
+// Arguments:
+//   obj = An Object list. No default.
+// Example:
+//   axle = Axle([]);
+//   values = obj_toc_get_attr_defaults(axle);
+//   // values == [20, 10];
+// Todo: 
+//   confirm, clarify example
+function obj_toc_get_attr_defaults(obj) = [ for (i=obj_toc_get_attributes(obj)) i[2] ];
 
 
 // Function: obj_toc_attr_len()
@@ -357,6 +374,42 @@ function obj_toc_get_attr_type_by_name(obj, name) = obj_toc_get_attr_type_by_id(
 //   type = obj_toc_get_attr_type_by_id(axle, 1);
 //   // type == "i"
 function obj_toc_get_attr_type_by_id(obj, id) = obj_toc_get_attr_types(obj)[ id ];
+
+
+// Function: obj_toc_get_attr_default_by_name()
+// Description:
+//   Given an object and an attribute name, return the attribute's default value 
+//   expected for that attribute. 
+// Usage:
+//   default_value = obj_toc_get_attr_default_by_name(obj, name);
+// Arguments:
+//   obj = An Object list. No default.
+//   name = The attribute name for whose default value you want. No default.
+// Example:
+//   axle = Axle([]);
+//   def = obj_toc_get_attr_default_by_name(axle, "style");
+//   // def == "axle"
+// Todo: 
+//   confirm, clarify example
+function obj_toc_get_attr_default_by_name(obj, name) = obj_toc_get_attr_default_by_id(obj, obj_toc_attr_id_by_name(obj, name));
+
+
+// Function: obj_toc_get_attr_default_by_id()
+// Description:
+//   Given an object and an attribute id, return the attribute's default value
+//   expected for that attribute.
+// Usage:
+//   default_value = obj_toc_get_attr_default_by_id(obj, id);
+// Arguments:
+//   obj = An Object list. No default.
+//   id = The attribute id for whose default value you want. No default.
+// Example:
+//   axle = Axle([]);
+//   def = obj_toc_get_attr_default_by_id(axle, 4);
+//   // def == "axle"
+// Todo: 
+//   confirm, clarify example
+function obj_toc_get_attr_default_by_id(obj, id) = obj_toc_get_attr_defaults(obj)[ id ];
 
 
 // Function: obj_toc_attr_id_by_name()
@@ -459,27 +512,75 @@ function obj_toc_attr_name_by_id(obj, id) =
 function attr_arglist_to_vlist(list) = [ for (i=list_to_matrix(list, 2)) if (_defined(i[1])) i ];
     
 
-// Function: attr_and_type_from_string_or_pairs()
+// Function: attr_type_default_from_string_or_pairs()
 // Description:
-//   Given either a list-pair of `[attribute, type]`, or a string of `attribute=type`, 
-//   return a tuple list-pair of `[attribute, type]`. `attribute` should be an attribute name 
+//   Given either a list-pair of `[attribute, type, default]`, or a string of `attribute=type=default`, 
+//   return a tuple list-pair of `[attribute, type, default]`. `attribute` should be an attribute name 
 //   for an object list under construction. If `type` is gleanable, it should be one of 
 //   types listed in `ATTRIBUTE_DATA_TYPES`. If `type` is not gleanable, it will be set to `undef`. 
+//   If a `default` is provided, it must match the `type` gleaned. 
 // Arguments:
 //   tuple = Either a string or list pair from which to construct the pairing. 
+//
+// Continues:
+//   Tuples of type `u` ("undefined") cannot have default values apart from `undef` specified. 
+//   .
+//   Tuples of type `l` ("list") or `o` ("object") can have a default value set at object creation, 
+//   however they must be defined as a list-pair and not as a string. 
+//
 // Todo:
 //   no real format or bounds checking is done on `tuple`, perhaps we should.
-function attr_and_type_from_string_or_pairs(tuple) = 
+function attr_type_default_from_string_or_pairs(tuple) = 
     let(
-        default_type = undef,
-        pairs = (is_list(tuple)) ? tuple : str_split(tuple, "="),
-        attr_name = pairs[0],
-        attr_type = (_defined(pairs[1])) ? pairs[1] : default_type
+        elems = (is_list(tuple)) ? tuple : str_split(tuple, "="),
+
+        attr_name = elems[0],
+
+        attr_type = (_defined(elems[1]) && obj_type_is_valid(elems[1]))
+            ? elems[1] 
+            : undef,
+
+        _attr_default = _attr_type_default_from_string_recast(
+            attr_type, 
+            (is_list(tuple))
+                ? elems[2]
+                : (len(elems) > 3)
+                    ? str_join(select(elems, 2, -1), "=")
+                    : elems[2]
+            ),
+
+        attr_default = (attr_type == "u")
+            ? undef 
+            : (_defined(attr_type) && _defined(_attr_default) && _type_check_value(attr_type, _attr_default))
+                ? _attr_default
+                : undef
         )
     assert(_defined(attr_name),
-        str("attr_and_type_from_string_or_pairs(): No attribute ",
+        str("attr_type_default_from_string_or_pairs(): No attribute ",
             "name gleanable from '", tuple, "'"))
-    [attr_name, attr_type];
+    [attr_name, attr_type, attr_default];
+
+
+function _attr_type_default_from_string_recast(type, value_as_string) = 
+    let(
+        v = (_type_check_value(type, value_as_string)) 
+            ? value_as_string
+            : (type == "b")
+                ? (value_as_string == "true")
+                    ? true
+                    : (value_as_string == "false")
+                        ? false
+                        : undef
+                : (type == "i")
+                    ? parse_int(value_as_string)
+                    : (type == "u")
+                        ? undef
+                        : (type == "s")
+                            ? value_as_string
+                            : (type == "l" || type == "o")
+                                ? undef  // not EVEN gonna try to parse that out
+                                : undef  // fall-through. 
+    ) v;
 
 
 // Function: obj_get_values()
@@ -569,23 +670,29 @@ function obj_has(obj, name) = in_list(name, obj_toc_get_attr_names(obj));
 //   The operation depends on what other options are passed. Calls to `obj_accessor()` with an `nv` (new-value) option 
 //   defined will create a new object based on `obj` with the new value set for `name`, and then will return that 
 //   new object (a "set" operation). 
-//   Calls to `obj_accessor()` without the `nv` option will look the current 
-//   value of `name` up in the object and return it (a "get" operation). "Get" operations can provide a `default` option: 
-//   if a `default` is defined and the value of `name` in the object is undefined, the value of `default` will be returned
-//   instead. 
+//   .
+//   Calls to `obj_accessor()` without the `nv` option will look the current value of `name` up in the object and 
+//   return it (a "get" operation). "Get" operations can provide a `default` option, for when values aren't set. 
+//   The precedence order for "gets" is: `object-stored-value || default-option || object-toc-stored-default || undef`:
+//   if the value of `name` in the object is not defined, the value of the `default` option passed to `obj_accessor()`
+//   will be returned; if there is no `default` option provided, the object's TOC default will be returned; if there is no TOC default
+//   for the object, `undef` will be returned. 
 //   
 // Usage:
 //   obj_accessor(obj, name, <default=undef>, <nv=undef>);
 // Usage: to retrieve an attribute's value from an object:
 //   value = obj_accessor(obj, name);
+//   value = obj_accessor(obj, name, <default=undef>);
 // Usage: to set an attribute's value into an object:
 //   new_object = obj_accessor(obj, name, nv=new_value);
+//
 // Arguments:
 //   obj = An Object list. No default. 
 //   name = The attribute name to access. The name must be present in `obj`'s TOC. No default. 
 //   ---
 //   default = If provided, and if there is no existing value for `name` in the object `obj`, returns the value of `default` instead. 
 //   nv = If provided, `accessor()` will update the value of the `name` attribute and return a new Object list. *The existing Object list is unmodified.*
+//
 // Continues:
 //   It's not an error to provide both `default` and `nv` in the same request, but doing so will yield a warning 
 //   nonetheless. If they're both present, `obj_accessor()` will act on the new value in `nv` and return a new object 
@@ -596,6 +703,7 @@ function obj_has(obj, name) = in_list(name, obj_toc_get_attr_names(obj));
 //   won't know what you meant to do and will act as if you wanted to "get" the value for that attribute. To explicitly 
 //   clear an object's attribute, use `obj_accessor_unset()`. To explicitly set an attribute to a new value, use 
 //   `obj_accessor_set()` (which will error out if `nv` is not defined). 
+//
 // Example: direct "get" call to `obj_accessor()`:
 //   axle = Axle(["length", 30]]);
 //   length = obj_accessor(axle, "length");
@@ -637,7 +745,12 @@ function obj_accessor(obj, name, default=undef, nv=undef) =
                 obj_toc_get_type(obj), ": both 'default' and 'nv' are specified for '", 
                 name, "', but only 'nv' takes effect."))
             : undef,
-        id = (_defined(obj) && _defined(name)) ? obj_toc_attr_id_by_name(obj, name) : undef
+        id = (_defined(obj) && _defined(name)) 
+            ? obj_toc_attr_id_by_name(obj, name) 
+            : undef,
+        toc_default = (_defined(id))
+            ? obj_toc_get_attr_default_by_id(obj, id)
+            : undef
     )        
     (_defined(nv))
         ? (id == 0)
@@ -649,7 +762,7 @@ function obj_accessor(obj, name, default=undef, nv=undef) =
                     "' doesn't match that attribute's type of '"))
         : (!_defined(id))
             ? default
-            : _first([obj[id], default]);
+            : _first([obj[id], default, toc_default, undef]);
 
 
 // Function: obj_accessor_get()
@@ -815,13 +928,16 @@ function obj_type_is_valid(type) = in_list(type, ATTRIBUTE_DATA_TYPES);
 function obj_type_check_value(obj, name, value) = 
     let(
         type_id = obj_toc_get_attr_type_by_name(obj, name)
-    )
+    ) _type_check_value(type_id, value);
+
+
+function _type_check_value(type_id, value) = 
     assert(obj_type_is_valid(type_id), 
-        str("obj_type_check_value(): Unknown type_id: ", type_id))
+        str("_type_check_value(): Unknown type_id: ", type_id))
     (type_id == "o")
         ? is_list(value)
-        :(type_id == "i") 
-            ? is_num(value) 
+        : (type_id == "i")
+            ? is_num(value)
             : (type_id == "s")
                 ? is_string(value)
                 : (type_id == "b")
