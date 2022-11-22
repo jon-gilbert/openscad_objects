@@ -32,13 +32,16 @@ To use, add the following lines to the beginning of your file:
     - [`obj_toc_get_attributes()`](#function-obj_toc_get_attributes)
     - [`obj_toc_get_attr_names()`](#function-obj_toc_get_attr_names)
     - [`obj_toc_get_attr_types()`](#function-obj_toc_get_attr_types)
+    - [`obj_toc_get_attr_defaults()`](#function-obj_toc_get_attr_defaults)
     - [`obj_toc_attr_len()`](#function-obj_toc_attr_len)
     - [`obj_toc_get_attr_type_by_name()`](#function-obj_toc_get_attr_type_by_name)
     - [`obj_toc_get_attr_type_by_id()`](#function-obj_toc_get_attr_type_by_id)
+    - [`obj_toc_get_attr_default_by_name()`](#function-obj_toc_get_attr_default_by_name)
+    - [`obj_toc_get_attr_default_by_id()`](#function-obj_toc_get_attr_default_by_id)
     - [`obj_toc_attr_id_by_name()`](#function-obj_toc_attr_id_by_name)
     - [`obj_toc_attr_name_by_id()`](#function-obj_toc_attr_name_by_id)
     - [`attr_arglist_to_vlist()`](#function-attr_arglist_to_vlist)
-    - [`attr_and_type_from_string_or_pairs()`](#function-attr_and_type_from_string_or_pairs)
+    - [`attr_type_default_from_string_or_pairs()`](#function-attr_type_default_from_string_or_pairs)
     - [`obj_get_values()`](#function-obj_get_values)
     - [`obj_has_value()`](#function-obj_has_value)
     - [`obj_has()`](#function-obj_has)
@@ -183,6 +186,7 @@ It is not an error to test for an object and have it return `false`.
 **Usage:** 
 
 - obj\_debug\_obj(obj);
+- obj\_debug\_obj(obj, &lt;show\_defaults=true&gt;, &lt;sub\_defaults=false&gt;);
 
 **Description:** 
 
@@ -195,6 +199,11 @@ be expanded with a visual indent.
 <abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
 -------------------- | ------------
 `obj`                | An Object list. No default.
+
+<abbr title="These args must be used by name, ie: name=value">By&nbsp;Name</abbr> | What it does
+-------------------- | ------------
+`show_defaults`      | If enabled, then TOC-provided defaults will be shown alongside the attribute data types. Default: `true`
+`sub_defaults`       | If enabled, then TOC-provided defaults will be shown as the attribute's value, if the value is not set. Default: `false`
 
 
 `obj_debug_obj()` does not output this debugging information anywhere: it's up
@@ -354,7 +363,7 @@ Given an object, return its list of attribute names.
 **Description:** 
 
 Given an object, return its list of attribute types. Types are
-returned in the same order and index as their corresponding attributes..
+returned in the same order and index as their corresponding attributes.
 
 **Arguments:** 
 
@@ -372,6 +381,38 @@ returned in the same order and index as their corresponding attributes..
     axle = Axle([]);
     names = obj_toc_get_attr_types(axle);
     // names == ["o", "i", "i"];
+
+<br clear="all" /><br/>
+
+---
+
+### Function: obj\_toc\_get\_attr\_defaults()
+
+**Usage:** 
+
+- obj\_toc\_get\_attr\_defaults(obj);
+
+**Description:** 
+
+Given an object, return its list of attribute default values. Default values are
+returned in the same order and index as their corresponding attribute names.
+
+**Arguments:** 
+
+<abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
+-------------------- | ------------
+`obj`                | An Object list. No default.
+
+**Todo:** 
+
+- confirm, clarify example
+
+**Example 1:** 
+
+    include <object_common_functions.scad>
+    axle = Axle([]);
+    values = obj_toc_get_attr_defaults(axle);
+    // values == [20, 10];
 
 <br clear="all" /><br/>
 
@@ -454,6 +495,72 @@ Valid data types are listed in `ATTRIBUTE_DATA_TYPES`.
     axle = Axle();
     type = obj_toc_get_attr_type_by_id(axle, 1);
     // type == "i"
+
+<br clear="all" /><br/>
+
+---
+
+### Function: obj\_toc\_get\_attr\_default\_by\_name()
+
+**Usage:** 
+
+- default\_value = obj\_toc\_get\_attr\_default\_by\_name(obj, name);
+
+**Description:** 
+
+Given an object and an attribute name, return the attribute's default value
+expected for that attribute.
+
+**Arguments:** 
+
+<abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
+-------------------- | ------------
+`obj`                | An Object list. No default.
+`name`               | The attribute name for whose default value you want. No default.
+
+**Todo:** 
+
+- confirm, clarify example
+
+**Example 1:** 
+
+    include <object_common_functions.scad>
+    axle = Axle([]);
+    def = obj_toc_get_attr_default_by_name(axle, "style");
+    // def == "axle"
+
+<br clear="all" /><br/>
+
+---
+
+### Function: obj\_toc\_get\_attr\_default\_by\_id()
+
+**Usage:** 
+
+- default\_value = obj\_toc\_get\_attr\_default\_by\_id(obj, id);
+
+**Description:** 
+
+Given an object and an attribute id, return the attribute's default value
+expected for that attribute.
+
+**Arguments:** 
+
+<abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
+-------------------- | ------------
+`obj`                | An Object list. No default.
+`id`                 | The attribute id for whose default value you want. No default.
+
+**Todo:** 
+
+- confirm, clarify example
+
+**Example 1:** 
+
+    include <object_common_functions.scad>
+    axle = Axle([]);
+    def = obj_toc_get_attr_default_by_id(axle, 4);
+    // def == "axle"
 
 <br clear="all" /><br/>
 
@@ -564,20 +671,27 @@ attr_arglist_to_vlist() will return a vlist suitable for a new object.
 
 ---
 
-### Function: attr\_and\_type\_from\_string\_or\_pairs()
+### Function: attr\_type\_default\_from\_string\_or\_pairs()
 
 **Description:** 
 
-Given either a list-pair of `[attribute, type]`, or a string of `attribute=type`,
-return a tuple list-pair of `[attribute, type]`. `attribute` should be an attribute name
+Given either a list-pair of `[attribute, type, default]`, or a string of `attribute=type=default`,
+return a tuple list-pair of `[attribute, type, default]`. `attribute` should be an attribute name
 for an object list under construction. If `type` is gleanable, it should be one of
 types listed in `ATTRIBUTE_DATA_TYPES`. If `type` is not gleanable, it will be set to `undef`.
+If a `default` is provided, it must match the `type` gleaned.
 
 **Arguments:** 
 
 <abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
 -------------------- | ------------
 `tuple`              | Either a string or list pair from which to construct the pairing.
+
+
+Tuples of type `u` ("undefined") cannot have default values apart from `undef` specified.
+
+Tuples of type `l` ("list") or `o` ("object") can have a default value set at object creation,
+however they must be defined as a list-pair and not as a string.
 
 **Todo:** 
 
@@ -725,6 +839,7 @@ set a named attribute explicitly to `undef` (essentially, a delete).
 **Usage:** to retrieve an attribute's value from an object:
 
 - value = obj\_accessor(obj, name);
+- value = obj\_accessor(obj, name, &lt;default=undef&gt;);
 
 **Usage:** to set an attribute's value into an object:
 
@@ -736,10 +851,13 @@ Basic accessor for object attributes. Given an object `obj` and an attribute nam
 The operation depends on what other options are passed. Calls to `obj_accessor()` with an `nv` (new-value) option
 defined will create a new object based on `obj` with the new value set for `name`, and then will return that
 new object (a "set" operation).
-Calls to `obj_accessor()` without the `nv` option will look the current
-value of `name` up in the object and return it (a "get" operation). "Get" operations can provide a `default` option:
-if a `default` is defined and the value of `name` in the object is undefined, the value of `default` will be returned
-instead.
+
+Calls to `obj_accessor()` without the `nv` option will look the current value of `name` up in the object and
+return it (a "get" operation). "Get" operations can provide a `default` option, for when values aren't set.
+The precedence order for "gets" is: `object-stored-value || default-option || object-toc-stored-default || undef`:
+if the value of `name` in the object is not defined, the value of the `default` option passed to `obj_accessor()`
+will be returned; if there is no `default` option provided, the object's TOC default will be returned; if there is no TOC default
+for the object, `undef` will be returned.
 
 
 **Arguments:** 
@@ -753,6 +871,7 @@ instead.
 -------------------- | ------------
 `default`            | If provided, and if there is no existing value for `name` in the object `obj`, returns the value of `default` instead.
 `nv`                 | If provided, `accessor()` will update the value of the `name` attribute and return a new Object list. *The existing Object list is unmodified.*
+`_consider_toc_default_values` | If enabled, TOC-stored defaults will be returned according to the mechanics above. If disabled with `false`, the TOC default for a given attribute will not be considered as a viable return value. Default: `true`
 
 
 It's not an error to provide both `default` and `nv` in the same request, but doing so will yield a warning
@@ -835,9 +954,14 @@ clear an object's attribute, use `obj_accessor_unset()`. To explicitly set an at
 **Description:** 
 
 Basic "get" accessor for Objects. Given an object `obj` and attribute name `name`, `obj_accessor_get()` will look the current
-value of `name` up in the object and return it (a "get" operation). Callers can provide a `default` option:
-if a `default` is defined and the value of `name` in the object is undefined, the value of `default` will be returned
-instead.
+value of `name` up in the object and return it (a "get" operation).
+
+`obj_accessor_get()` is a simplified wrap around `obj_accessor()`, and the mechanics on how values are returned
+are the same. "Get" operations can provide a `default` option, for when values aren't set.
+The precedence order for "gets" is: `object-stored-value || default-option || object-toc-stored-default || undef`:
+if the value of `name` in the object is not defined, the value of the `default` option passed to `obj_accessor_get()`
+will be returned; if there is no `default` option provided, the object's TOC default will be returned; if there is no TOC default
+for the object, `undef` will be returned.
 
 **Arguments:** 
 
@@ -849,6 +973,7 @@ instead.
 <abbr title="These args must be used by name, ie: name=value">By&nbsp;Name</abbr> | What it does
 -------------------- | ------------
 `default`            | If provided, and if there is no existing value for `name` in the object `obj`, returns the value of `default` instead.
+`_consider_toc_default_values` | If enabled, TOC-stored defaults will be returned according to the mechanics above. If disabled with `false`, the TOC default for a given attribute will not be considered as a viable return value. Default: `true`
 
 
 Note that `obj_accessor_get()` will accept a `nv` option, to make writing accessor glue easier, but

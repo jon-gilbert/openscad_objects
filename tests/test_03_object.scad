@@ -13,16 +13,25 @@ function gen_test_type_object() =
 
 
 module test_obj_build_toc() {
+    // test string-based paired creation
     toc = obj_build_toc("Test", ["one=i", "two=s"], []);
+    assert( obj_is_obj( [toc, undef, undef] ));
+
     assert( obj_toc_get_type([toc, undef, undef]) == "Test" );
     assert( obj_toc_attr_len([toc, undef, undef]) == 2 );
     assert( obj_toc_get_attr_names([toc, undef, undef]) == ["_toc_", "one", "two"] );
 
+    // test mutate TOC propgation
     mtoc = obj_build_toc("Test", ["three=i", "four=s"], [toc, undef, undef] );
     assert( obj_toc_get_type([mtoc, undef, undef]) == "Test" );
     assert( obj_toc_attr_len([mtoc, undef, undef]) == 2 );
-    assert( obj_toc_get_attr_names([mtoc, undef, undef]) == ["_toc_", "one", "two"] );
-    
+    assert( obj_toc_get_attr_names([mtoc, undef, undef]) == ["_toc_", "one", "two"], toc);
+
+    // test list-based paired TOC creation
+    ptoc = obj_build_toc("TestP", [["five", "i"], ["six", "s"]], []);
+    assert( obj_toc_get_type([ptoc, undef, undef]) == "TestP" );
+    assert( obj_toc_attr_len([ptoc, undef, undef]) == 2 );
+    assert( obj_toc_get_attr_names([ptoc, undef, undef]) == ["_toc_", "five", "six"] );
 }
 test_obj_build_toc();
 
@@ -93,7 +102,8 @@ module test_obj_is_obj() {
     assert( is_list(obj),  str( "obj needs to be a list, it is a:", obj ));
     assert( _defined(obj), str( "obj needs to be defined (it cannot be empty), its def status is:", _defined(obj) ));
     assert( len(obj[0]) == len(obj), str( "length of obj[0] needs to be the same as the length of obj: ", len(obj[0]), " vs ", len(obj) ));
-    assert( list_shape( list_tail( obj_toc_get_attributes(obj), 1 ), 1) == 2, str( "all attributes listed in toc (not the toc type tho) need to be similar depth" ));
+    assert( list_shape( list_tail( obj_toc_get_attributes(obj), 1 ), 1) == 3, 
+        str( "all attributes listed in toc (not the toc type tho) need to be similar depth" ));
 }
 test_obj_is_obj();
 
@@ -199,7 +209,7 @@ module test_obj_tocs() {
     obj = F([]);
     assert( obj_is_obj(obj) );
     assert( obj_toc_get_type(obj) == "F" );
-    assert( obj_toc_get_attributes(obj) == [["_toc_", "o"], ["string", "s"], ["integer", "i"], ["boolean", "b"], ["list", "l"], ["undefined", "u"], ["object", "o"]] ); 
+    assert( obj_toc_get_attributes(obj) == [["_toc_", "o"], ["string", "s", undef], ["integer", "i", undef], ["boolean", "b", undef], ["list", "l", undef], ["undefined", "u", undef], ["object", "o", undef]], obj_toc_get_attributes(obj) ); 
     assert( obj_toc_get_attr_names(obj) == ["_toc_", "string", "integer", "boolean", "list", "undefined", "object"] );
     assert( obj_toc_get_attr_types(obj) == ["o", "s", "i", "b", "l", "u", "o"] );
 
@@ -230,5 +240,72 @@ module test_obj_tocs() {
 }
 test_obj_tocs();
 
+
+module test_obj_default_args() {
+    function V(vlist=[], mutate=[]) = Object( "V", 
+        ["string=s=yoink", 
+            "integer=i=10", 
+            "neg_int=i=-10", 
+            "b_false=b=false", 
+            "b_true=b=true", 
+            "undefined=u", 
+            "list=l=[1, 2]", 
+            ["proper_list", "l", [1, 2]],
+            "object=o"],
+        vlist=vlist, mutate=mutate );
+
+    v = V([]);
+    assert( obj_is_obj(v) );
+    assert( obj_accessor_get(v, "string") == "yoink" );
+    assert( obj_accessor_get(v, "string", default="yeet" ) == "yeet" );
+    assert( obj_accessor_get(v, "string", default=undef ) == "yoink" );
+    assert( obj_accessor_get(v, "integer") == 10 );
+    assert( obj_accessor_get(v, "integer", default=100 ) == 100 );
+    assert( obj_accessor_get(v, "integer", default=-1 ) == -1 );
+    assert( obj_accessor_get(v, "neg_int") == -10 );
+    assert( obj_accessor_get(v, "b_false") == false );
+    assert( obj_accessor_get(v, "b_true") == true );
+    assert( obj_accessor_get(v, "undefined") == undef );
+    assert( obj_accessor_get(v, "list") == undef );
+    assert( obj_accessor_get(v, "proper_list") == [1, 2] );
+    assert( obj_accessor_get(v, "object") == undef );
+
+
+    function W(vlist=[], mutate=[]) = Object( "W", [
+            ["string",          "s", "yoink"], 
+            ["integer",         "i", 10], 
+            ["neg_int",         "i", -1], 
+            ["zero",            "i", 0],
+            ["b_false",         "b", false], 
+            ["b_true",          "b", true], 
+            ["undefined",       "u", "whatever"], 
+            ["list",            "l", [1, 2] ], 
+            ["object",          "o", V() ],
+        ],
+        vlist=vlist, mutate=mutate );
+
+    w = W();
+    assert( obj_is_obj(w) );
+    assert( obj_accessor_get(w, "string") == "yoink" );
+    assert( obj_accessor_get(w, "neg_int") == -1 );
+    assert( obj_accessor_get(w, "zero") == 0 );
+    assert( obj_accessor_get(w, "b_false") == false );
+    assert( obj_accessor_get(w, "b_true") == true );
+    assert( obj_accessor_get(w, "undefined") == undef );
+    assert( obj_accessor_get(w, "list") == [1, 2] );
+    assert( obj_is_obj( obj_accessor_get(w, "object") ) );
+    assert( obj_accessor_get(w, "object") == V() );
+
+    function X(vlist=[], mutate=[]) = Object("X", [
+        ["o", "o", V(["string", "asdf"]) ]
+        ], vlist=vlist, mutate=mutate);
+    x = X();
+    assert( obj_is_obj(x) );
+    assert( obj_is_obj( obj_accessor(x, "o") ) );
+    assert( obj_toc_get_type( obj_accessor(x, "o") ) == "V" );
+    assert( obj_accessor( obj_accessor(x, "o"), "string") == "asdf" );
+
+}
+test_obj_default_args();
 
 

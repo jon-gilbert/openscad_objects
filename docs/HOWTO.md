@@ -1,4 +1,4 @@
-# Section: Minimal Tooling To Add Objects To Your Model
+# Howto: Minimal Tooling To Add Objects To Your Model
 Here's the simplest set of steps to get your LibFile "object-ified". 
 
 ## Subsection: 1. Pick a name
@@ -19,19 +19,23 @@ We'll use the notion of an Axle object throughout the rest of this section for e
 ## Subsection: 2. Define the model attributes
 *tl;dr:* `Axle_attributes = ["diameter=i", "length=i"];`
 
-Objects are based around the notion of attributes, and the accessing of them thus, and pretty much everything is built 
+Objects are based around the notion of attributes and repeatedly accessing them, and pretty much everything is built 
 around the list of known attributes for your object. Start with a list of things that makes your model, that you find 
 yourself passing around over and over, that are common to the things that make your model. That list is your attributes. 
 For our purposes, we'll care most about the *length* of an axle, and its *diameter*: those two things are 
 our Axle's attributes. 
 
-It's easy to mix various data types into an object. A single object can have a variety of numbers (like for measurements and 
+It's easy to mix various data types into an object. A single OpenSCAD model can have a variety of numbers (like for measurements and 
 dimensions), strings (for labeling, identification, or style selection), booleans (to enable a particular model feature), 
-or other objects. Because it's easy to mix them around, it's easy to mistake the type of value for a given attribute. 
+and there's no enforcement within OpenSCAD that limits what data types can be assigned to variables.  
+Because it's easy to mix them around, it's easy to mistake the type of value for a given attribute. 
 *(Ask me how many times I've messed up referencing a number when I really wanted a list and getting a console error, go on.)*
-So: attributes specify the *type* of data they'll accept. `[attribute_name=attribute_type]` is how those types are specified;
+So: object attributes specify the *type* of data they'll accept, and if you accidentally try to store a value that isn't of 
+that attribute's type, it'll be rejected. `[attribute_name=attribute_type]` is how those types are specified;
 `attribute_type` is one of types found in `ATTRIBUTE_DATA_TYPES`, detailed below. In this example both the diameter and length 
-are expected to be integers, so we'll use the `i` type.
+are expected to be integers, so we'll use the `i` type.  There's a whole bevy of supported data types for your object's 
+attributes: `i` (for integers), `s` (for strings), `b` (for booleans), `l` (for lists), `u` (for undefined values), 
+and `o` (for other objects). 
 
 Assign the collection of attributes and their types to a list, with a globally-unique name. A good practice would to have the name you 
 picked above as part of the name of the list - for example, `Axle_attributes` - but this isn't really required. 
@@ -41,9 +45,7 @@ inline to `Object()` and never worry about them again - keep reading to see how.
 Define the list somewhere near the top of your .scad file, like so:
 `Axle_attributes = ["diameter=i", "length=i"];`
 
-**A word on attribute types:** ...should be provided, here. 
-
-Of course once you've defined it up near line 3, you can't change it down below at line 378 (because OpenSCAD 
+Of course once you've defined your attribute listing up near line 3, you can't change it down below at line 378 (because OpenSCAD 
 doesn't permit that), but that's all right - you really wouldn't *want* to change it mid-script, because then objects 
 created later wouldn't have all the attributes built into it. 
 
@@ -212,10 +214,12 @@ If you're used to working with object-oriented programming in a reasonably moder
 idea of objects is probably already natural to you, and you're already looking at all this and thinking, 
 "but wait, what about private encapsulated object data , or polymorphism, or inheritance, or class-specific 
 methods, or, or, or?"  
+
 Some of these things just aren't possible in OpenSCAD; calling functions by reference isn't a thing and there's 
 really only one namespace into which we can put things, so making modules and functions "private" is a non-starter. 
 OpenSCAD is declaritive, and changing variable values after assignment isn't a thing, so we lose out on things like 
-easily inherited classes. I imagine one could produce a whole laundry list like this. 
+easily inherited classes. I imagine one could produce a whole laundry list of "things that one might expect to 
+be present in both functional and declartive programming languages but aren't in OpenSCAD for Reasons", and that's OK. 
 
 ## So... why?
 This LibFile wasn't built to meet all those needs. It really only had a few things in mind:
