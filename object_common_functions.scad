@@ -542,11 +542,9 @@ function attr_type_default_from_string_or_pairs(tuple) =
 
         _attr_default = _attr_type_default_from_string_recast(
             attr_type, 
-            (is_list(tuple))
+            (is_list(tuple) || len(elems) < 3)
                 ? elems[2]
-                : (len(elems) > 3)
-                    ? str_join(select(elems, 2, -1), "=")
-                    : elems[2]
+                : str_join(select(elems, 2, -1), "=")
             ),
 
         attr_default = (attr_type == "u")
