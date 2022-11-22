@@ -175,8 +175,12 @@ function obj_value_datatype_check(obj) = !in_list(false,
 //   be expanded with a visual indent.
 // Usage:
 //   obj_debug_obj(obj);
+//   obj_debug_obj(obj, <show_defaults=true>, <sub_defaults=false>);
 // Arguments:
 //   obj = An Object list. No default. 
+//   ---
+//   show_defaults = If enabled, then TOC-provided defaults will be shown alongside the attribute data types. Default: `true`
+//   sub_defaults = If enabled, then TOC-provided defaults will be shown as the attribute's value, if the value is not set. Default: `false`
 // Continues:
 //   `obj_debug_obj()` does not output this debugging information anywhere: it's up 
 //   to the caller to do this. 
@@ -187,19 +191,33 @@ function obj_value_datatype_check(obj) = !in_list(false,
 //   //   ECHO: "0: _toc_: ["Axle", "diameter", "length"]
 //   //   1: diameter: 10 (i)
 //   //   2: length: undef (i)"
-function obj_debug_obj(obj, ws="") =
+function obj_debug_obj(obj, ws="", sub_defaults=false, show_defaults=true) =
     let(
         debug_data_toc = str(ws, "0: _toc_: ", obj_toc_get_type(obj)),
         debug_data = [
             for( i=[1:obj_toc_attr_len(obj)] ) 
                 str(ws, 
-                    i, ": ", obj_toc_attr_name_by_id(obj, i), " (", obj_toc_get_attr_types(obj)[i], "): ", 
-                    (obj_toc_get_attr_types(obj)[i] == "o" && defined(obj_accessor_get(obj, obj_toc_attr_name_by_id(obj, i)))) 
+                    i, ": ", obj_toc_attr_name_by_id(obj, i), 
+                    " (", obj_toc_get_attr_types(obj)[i], 
+                        (show_defaults && defined(obj_toc_get_attr_default_by_id(obj, i)))
+                            ? str(": ", obj_toc_get_attr_default_by_id(obj, i))
+                            : "",
+                    "): ", 
+                    (obj_toc_get_attr_types(obj)[i] == "o" 
+                            && defined(obj_accessor_get(obj, 
+                                obj_toc_attr_name_by_id(obj, i), 
+                                _consider_toc_default_values=sub_defaults)))
                         ? str("\n", 
-                            obj_debug_obj(obj_accessor_get(obj, obj_toc_attr_name_by_id(obj, i)), ws=str(ws, "   "))
+                            obj_debug_obj(
+                                obj_accessor_get(obj, 
+                                    obj_toc_attr_name_by_id(obj, i)), 
+                                ws=str(ws, "   "), 
+                                sub_defaults=sub_defaults)
                             )
-                        : obj_accessor_get(obj, obj_toc_attr_name_by_id(obj, i))
-                    ) 
+                        : obj_accessor_get(obj, 
+                            obj_toc_attr_name_by_id(obj, i), 
+                            _consider_toc_default_values=sub_defaults)
+                    )
             ],
         full_data = list_insert(debug_data, [0], [debug_data_toc])
     )
@@ -690,6 +708,7 @@ function obj_has(obj, name) = in_list(name, obj_toc_get_attr_names(obj));
 //   ---
 //   default = If provided, and if there is no existing value for `name` in the object `obj`, returns the value of `default` instead. 
 //   nv = If provided, `accessor()` will update the value of the `name` attribute and return a new Object list. *The existing Object list is unmodified.*
+//   _consider_toc_default_values = If enabled, TOC-stored defaults will be returned according to the mechanics above. If disabled with `false`, the TOC default for a given attribute will not be considered as a viable return value. Default: `true`
 //
 // Continues:
 //   It's not an error to provide both `default` and `nv` in the same request, but doing so will yield a warning 
@@ -736,7 +755,7 @@ function obj_has(obj, name) = in_list(name, obj_toc_get_attr_names(obj));
 //   when getting an attribute without a value and a default is provided, do a type check on the default value before returning
 // EXTERNAL - 
 //   list_set() (BOSL2);
-function obj_accessor(obj, name, default=undef, nv=undef) = 
+function obj_accessor(obj, name, default=undef, nv=undef, _consider_toc_default_values=true) = 
     let(
         _ = (_defined(default) && _defined(nv))
             ? echo(str("WARNING: obj_accessor(): ",
@@ -746,7 +765,7 @@ function obj_accessor(obj, name, default=undef, nv=undef) =
         id = (_defined(obj) && _defined(name)) 
             ? obj_toc_attr_id_by_name(obj, name) 
             : undef,
-        toc_default = (_defined(id))
+        toc_default = (_defined(id) && _consider_toc_default_values)
             ? obj_toc_get_attr_default_by_id(obj, id)
             : undef
     )        
@@ -766,9 +785,15 @@ function obj_accessor(obj, name, default=undef, nv=undef) =
 // Function: obj_accessor_get()
 // Description:
 //   Basic "get" accessor for Objects. Given an object `obj` and attribute name `name`, `obj_accessor_get()` will look the current 
-//   value of `name` up in the object and return it (a "get" operation). Callers can provide a `default` option: 
-//   if a `default` is defined and the value of `name` in the object is undefined, the value of `default` will be returned
-//   instead. 
+//   value of `name` up in the object and return it (a "get" operation). 
+//   .
+//   `obj_accessor_get()` is a simplified wrap around `obj_accessor()`, and the mechanics on how values are returned 
+//   are the same. "Get" operations can provide a `default` option, for when values aren't set. 
+//   The precedence order for "gets" is: `object-stored-value || default-option || object-toc-stored-default || undef`:
+//   if the value of `name` in the object is not defined, the value of the `default` option passed to `obj_accessor_get()`
+//   will be returned; if there is no `default` option provided, the object's TOC default will be returned; if there is no TOC default
+//   for the object, `undef` will be returned. 
+//
 // Usage:
 //   obj_accessor_get(obj, name, <default=undef>);
 // Arguments:
@@ -776,6 +801,7 @@ function obj_accessor(obj, name, default=undef, nv=undef) =
 //   name = The attribute name to access. The name must be present in `obj`'s TOC.
 //   ---
 //   default = If provided, and if there is no existing value for `name` in the object `obj`, returns the value of `default` instead. 
+//   _consider_toc_default_values = If enabled, TOC-stored defaults will be returned according to the mechanics above. If disabled with `false`, the TOC default for a given attribute will not be considered as a viable return value. Default: `true`
 // Continues:
 //   Note that `obj_accessor_get()` will accept a `nv` option, to make writing accessor glue easier, but 
 //   that `nv` option won't be evaluated or used. 
@@ -790,7 +816,7 @@ function obj_accessor(obj, name, default=undef, nv=undef) =
 //   axle = Axle([["diameter", 10], ["length", 30]]);
 //   length = get_axle_length(axle);
 //   // length == 30
-function obj_accessor_get(obj, name, nv=undef, default=undef) = 
+function obj_accessor_get(obj, name, nv=undef, default=undef, _consider_toc_default_values=true) = 
     let(
         _ = (_defined(nv))
             ? echo(str("WARNING: obj_accessor_get(): ", 
@@ -799,7 +825,7 @@ function obj_accessor_get(obj, name, nv=undef, default=undef) =
                 "obj_accessor_get(), and will be ignored."))
             : undef
     )
-    obj_accessor(obj, name, default=default);
+    obj_accessor(obj, name, default=default, _consider_toc_default_values=_consider_toc_default_values);
 
 
 // Function: obj_accessor_set()
