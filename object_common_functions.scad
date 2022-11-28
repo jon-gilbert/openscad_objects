@@ -199,12 +199,12 @@ function obj_debug_obj(obj, ws="", sub_defaults=false, show_defaults=true) =
                 str(ws, 
                     i, ": ", obj_toc_attr_name_by_id(obj, i), 
                     " (", obj_toc_get_attr_types(obj)[i], 
-                        (show_defaults && defined(obj_toc_get_attr_default_by_id(obj, i)))
+                        (show_defaults && _defined(obj_toc_get_attr_default_by_id(obj, i)))
                             ? str(": ", obj_toc_get_attr_default_by_id(obj, i))
                             : "",
                     "): ", 
                     (obj_toc_get_attr_types(obj)[i] == "o" 
-                            && defined(obj_accessor_get(obj, 
+                            && _defined(obj_accessor_get(obj, 
                                 obj_toc_attr_name_by_id(obj, i), 
                                 _consider_toc_default_values=sub_defaults)))
                         ? str("\n", 
