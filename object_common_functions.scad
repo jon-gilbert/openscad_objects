@@ -588,7 +588,7 @@ function _attr_type_default_from_string_recast(type, value_as_string) =
                         ? false
                         : undef
                 : (type == "i")
-                    ? parse_int(value_as_string)
+                    ? parse_float(value_as_string)
                     : (type == "u")
                         ? undef
                         : (type == "s")
