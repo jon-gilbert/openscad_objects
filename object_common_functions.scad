@@ -899,6 +899,124 @@ function obj_accessor_unset(obj, name) =
     list_set(obj, obj_toc_attr_id_by_name(obj, name), undef);
 
 
+// Subsection: Managing Lists of Objects
+//   These are functions to help manage lists or collections of Objects. In most cases,
+//   standard list manipulation functions work fine, but when you need to select or act
+//   on a subset of Objects based on their attribute values, turn here.
+//
+//
+// Function: obj_select()
+// Usage:
+//   list = obj_select(obj_list, idxs);
+//
+// Description:
+//   Given a list of objects `obj_list` and a list of element indexes `idxs`, returns the
+//   objects in `obj_list` identified by their index position `idx`.
+//   .
+//   The Objects need not be all of the same object type.
+//
+// Arguments:
+//   obj_list = A list of Objects
+//   idxs = A list of positional index integers
+//
+// Continues:
+//   It's probably a really bad idea to give a list of `idxs` that doesn't match the
+//   length of `obj_list`.
+//
+// Todo:
+//   turns out this is just a very thinly wrapped select(). Is there a reason to keep this?
+//
+function obj_select(obj_list, idxs) =
+    [ for (i=idxs) obj_list[i] ];
+    //select(obj_list, idxs);
+
+
+// Function: obj_select_by_attr_defined()
+// Usage:
+//   list = obj_select_by_attr_defined(obj_list, attr);
+// Description:
+//   Given a list of Objects `obj_list` and an attribute name `attr`, return a list of
+//   all the Objects in `obj_list` that have the attribute `attr` defined.
+//   The Objects are returned in the order they appear in `obj_list`.
+//   The returned `list` of Objects may not be the same length as `obj_list`. The returned
+//   list `list` may have no elements in it.
+//   .
+//   The list of Objects need not be all of the same type.
+//
+// Arguments:
+//   obj_list = A list of Objects
+//   attr = An attribute name
+//
+function obj_select_by_attr_defined(obj_list, attr) =
+    list_remove_values(
+        [ for (obj=obj_list) (obj_has(obj, attr) && _defined( obj_accessor_get(obj, attr))) ? obj : undef ],
+        undef,
+        all=true);
+
+
+// Function: obj_select_by_attr_value()
+// Usage:
+//   list = obj_select_by_attr_value(obj_list, attr, value);
+// Description:
+//   Given an list of Objects `obj_list`, an attribute name `attr`, and a comparison value `value`, return
+//   a list of all Objects in `obj_list` whose value for `attr` matches `value`.
+//   The Objects are returned in the order they appear in `obj_list`.
+//   .
+//   The Objects in `obj_list` need not be all of the same type.
+//
+// Arguments:
+//   obj_list = A list of Objects
+//   attr = An attribute name
+//   value = A comparison value
+//
+function obj_select_by_attr_value(obj_list, attr, value) =
+    let( reduced_obj_list = obj_select_by_attr_defined(obj_list, attr) )
+    list_remove_values(
+        [ for (obj=reduced_obj_list) (obj_accessor_get(obj, attr) == value) ? obj : undef ],
+        undef,
+        all=true);
+
+
+// Function: obj_sort_by_attribute()
+// Usage:
+//   list = obj_sort_by_attribute(obj_list, attr);
+// Description:
+//   Given a list of Objects `obj_list` and an attribute name `attr`, sort the list
+//   of objects by the value of their attribute `attr` and return that list.
+//   .
+//   Objects listed in `obj_list` need not be all of the same type.
+//
+// Arguments:
+//   obj_list = A list of Objects
+//   attr = An attribute name
+//
+function obj_sort_by_attribute(obj_list, attr) =
+    let(
+        idxs = sortidx( obj_select_values_from_obj_list(obj_list, attr) )
+    )
+    obj_select(obj_list, idxs);
+
+
+// Function: obj_select_values_from_obj_list()
+// Usage:
+//   list = obj_select_values_from_obj_list(obj_list, attr);
+// Description:
+//   Given a list of Objects `obj_list` and an attribute name `attr`, return
+//   a list of all the values of `attr` in the Objects in `obj_list`. The
+//   values are returned in the order they appear in `obj_list`.
+//   .
+//   The Objects in `obj_list` need not be all the same type.
+//
+// Arguments:
+//   obj_list = A list of Objects
+//   attr = An attribute name
+//   ---
+//   default = A value to be used as a default for Objects that do not have their attribute `attr` set. Default: undef
+//
+function obj_select_values_from_obj_list(obj_list, attr, default=undef) =
+    [ for (obj=obj_list) (obj_has(obj, attr)) ? obj_accessor_get(obj, attr, default=default) : undef ];
+
+
 // ------------------------------------------------------------------------------------------------------------
 // Subsection: Object Attribute Data Types
 //   

@@ -20,7 +20,8 @@ To use, add the following lines to the beginning of your file:
 1. [Section: Object Functions](#section-object-functions)
     1. [Subsection: Object Table-of-Contents Functions](#subsection-object-table-of-contents-functions)
     2. [Subsection: Object Base Accessors](#subsection-object-base-accessors)
-    3. [Subsection: Object Attribute Data Types](#subsection-object-attribute-data-types)
+    3. [Subsection: Managing Lists of Objects](#subsection-managing-lists-of-objects)
+    4. [Subsection: Object Attribute Data Types](#subsection-object-attribute-data-types)
     
     - [`Object()`](#function-object)
     - [`obj_is_obj()`](#function-obj_is_obj)
@@ -49,6 +50,11 @@ To use, add the following lines to the beginning of your file:
     - [`obj_accessor_get()`](#function-obj_accessor_get)
     - [`obj_accessor_set()`](#function-obj_accessor_set)
     - [`obj_accessor_unset()`](#function-obj_accessor_unset)
+    - [`obj_select()`](#function-obj_select)
+    - [`obj_select_by_attr_defined()`](#function-obj_select_by_attr_defined)
+    - [`obj_select_by_attr_value()`](#function-obj_select_by_attr_value)
+    - [`obj_sort_by_attribute()`](#function-obj_sort_by_attribute)
+    - [`obj_select_values_from_obj_list()`](#function-obj_select_values_from_obj_list)
     - [`ATTRIBUTE_DATA_TYPES`](#constant-attribute_data_types)
     - [`obj_type_is_valid()`](#function-obj_type_is_valid)
     - [`obj_type_check_value()`](#function-obj_type_check_value)
@@ -1096,6 +1102,140 @@ wholly new Object list with the unset value is returned instead.
     // new_axle == [["Axle", "diameter", "length"], 10, undef];
 
 <br clear="all" /><br/>
+
+---
+
+## Subsection: Managing Lists of Objects
+
+These are functions to help manage lists or collections of Objects. In most cases,
+standard list manipulation functions work fine, but when you need to select or act
+on a subset of Objects based on their attribute values, turn here.
+
+### Function: obj\_select()
+
+**Usage:** 
+
+- list = obj\_select(obj\_list, idxs);
+
+**Description:** 
+
+Given a list of objects `obj_list` and a list of element indexes `idxs`, returns the
+objects in `obj_list` identified by their index position `idx`.
+
+The Objects need not be all of the same object type.
+
+**Arguments:** 
+
+<abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
+-------------------- | ------------
+`obj_list`           | A list of Objects
+`idxs`               | A list of positional index integers
+
+
+It's probably a really bad idea to give a list of `idxs` that doesn't match the
+length of `obj_list`.
+
+**Todo:** 
+
+- turns out this is just a very thinly wrapped select(). Is there a reason to keep this?
+
+---
+
+### Function: obj\_select\_by\_attr\_defined()
+
+**Usage:** 
+
+- list = obj\_select\_by\_attr\_defined(obj\_list, attr);
+
+**Description:** 
+
+Given a list of Objects `obj_list` and an attribute name `attr`, return a list of
+all the Objects in `obj_list` that have the attribute `attr` defined.
+The Objects are returned in the order they appear in `obj_list`.
+The returned `list` of Objects may not be the same length as `obj_list`. The returned
+list `list` may have no elements in it.
+
+The list of Objects need not be all of the same type.
+
+**Arguments:** 
+
+<abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
+-------------------- | ------------
+`obj_list`           | A list of Objects
+`attr`               | An attribute name
+
+---
+
+### Function: obj\_select\_by\_attr\_value()
+
+**Usage:** 
+
+- list = obj\_select\_by\_attr\_value(obj\_list, attr, value);
+
+**Description:** 
+
+Given an list of Objects `obj_list`, an attribute name `attr`, and a comparison value `value`, return
+a list of all Objects in `obj_list` whose value for `attr` matches `value`.
+The Objects are returned in the order they appear in `obj_list`.
+
+The Objects in `obj_list` need not be all of the same type.
+
+**Arguments:** 
+
+<abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
+-------------------- | ------------
+`obj_list`           | A list of Objects
+`attr`               | An attribute name
+`value`              | A comparison value
+
+---
+
+### Function: obj\_sort\_by\_attribute()
+
+**Usage:** 
+
+- list = obj\_sort\_by\_attribute(obj\_list, attr);
+
+**Description:** 
+
+Given a list of Objects `obj_list` and an attribute name `attr`, sort the list
+of objects by the value of their attribute `attr` and return that list.
+
+Objects listed in `obj_list` need not be all of the same type.
+
+**Arguments:** 
+
+<abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
+-------------------- | ------------
+`obj_list`           | A list of Objects
+`attr`               | An attribute name
+
+---
+
+### Function: obj\_select\_values\_from\_obj\_list()
+
+**Usage:** 
+
+- list = obj\_select\_values\_from\_obj\_list(obj\_list, attr);
+
+**Description:** 
+
+Given a list of Objects `obj_list` and an attribute name `attr`, return
+a list of all the values of `attr` in the Objects in `obj_list`. The
+values are returned in the order they appear in `obj_list`.
+
+The Objects in `obj_list` need not be all the same type.
+
+**Arguments:** 
+
+<abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
+-------------------- | ------------
+`obj_list`           | A list of Objects
+`attr`               | An attribute name
+
+<abbr title="These args must be used by name, ie: name=value">By&nbsp;Name</abbr> | What it does
+-------------------- | ------------
+`default`            | A value to be used as a default for Objects that do not have their attribute `attr` set. Default: undef
 
 ---
 
