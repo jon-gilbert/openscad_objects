@@ -1017,6 +1017,18 @@ function obj_select_values_from_obj_list(obj_list, attr, default=undef) =
     [ for (obj=obj_list) (obj_has(obj, attr)) ? obj_accessor_get(obj, attr, default=default) : undef ];
 
 
+// Function: obj_list_debug_obj()
+// Usage:
+//   list = obj_list_debug_obj(obj_list);
+// Description:
+//   Given a list of Objects `obj_list`, run `obj_debug_obj()` on each 
+//   Object, and return their output as a list. 
+// Arguments:
+//   obj_list = A list of Objects
+//
+function obj_list_debug_obj(obj_list) = [ for (obj=obj_list) obj_debug_obj(obj) ];
+
+
 // ------------------------------------------------------------------------------------------------------------
 // Subsection: Object Attribute Data Types
 //   
