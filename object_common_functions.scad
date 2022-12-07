@@ -992,9 +992,13 @@ function obj_select_by_attr_value(obj_list, attr, value) =
 //
 function obj_sort_by_attribute(obj_list, attr) =
     let(
-        idxs = sortidx( obj_select_values_from_obj_list(obj_list, attr) )
-    )
-    obj_select(obj_list, idxs);
+        value_list = obj_select_values_from_obj_list(obj_list, attr),
+        idxs = sortidx( value_list ),
+    ) (len(obj_list) == 1)
+        ? obj_list
+        : (len(value_list) == 0)
+            ? []
+            : obj_select(obj_list, idxs);
 
 
 // Function: obj_select_values_from_obj_list()
@@ -1016,6 +1020,17 @@ function obj_sort_by_attribute(obj_list, attr) =
 function obj_select_values_from_obj_list(obj_list, attr, default=undef) =
     [ for (obj=obj_list) (obj_has(obj, attr)) ? obj_accessor_get(obj, attr, default=default) : undef ];
 
+
+// Function: obj_regroup_list_by_attr()
+function obj_regroup_list_by_attr(obj_list, attr) = 
+    let(
+        unique_attrs = unique(
+            obj_select_values_from_obj_list(
+                obj_list,
+                attr
+                )
+            ),
+    ) [ for (v=unique_attrs) [ obj_select_by_attr_value(obj_list, attr, v) ] ];
 
 // Function: obj_list_debug_obj()
 // Usage:
