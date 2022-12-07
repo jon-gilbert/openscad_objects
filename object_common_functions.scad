@@ -993,7 +993,7 @@ function obj_select_by_attr_value(obj_list, attr, value) =
 function obj_sort_by_attribute(obj_list, attr) =
     let(
         value_list = obj_select_values_from_obj_list(obj_list, attr),
-        idxs = sortidx( value_list ),
+        idxs = sortidx( value_list )
     ) (len(obj_list) == 1)
         ? obj_list
         : (len(value_list) == 0)
@@ -1029,7 +1029,7 @@ function obj_regroup_list_by_attr(obj_list, attr) =
                 obj_list,
                 attr
                 )
-            ),
+            )
     ) [ for (v=unique_attrs) [ obj_select_by_attr_value(obj_list, attr, v) ] ];
 
 // Function: obj_list_debug_obj()
