@@ -1030,7 +1030,7 @@ function obj_regroup_list_by_attr(obj_list, attr) =
                 attr
                 )
             )
-    ) [ for (v=unique_attrs) [ obj_select_by_attr_value(obj_list, attr, v) ] ];
+    ) [ for (v=unique_attrs) obj_select_by_attr_value(obj_list, attr, v) ];
 
 // Function: obj_list_debug_obj()
 // Usage:
