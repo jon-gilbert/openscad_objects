@@ -934,6 +934,7 @@ function obj_select(obj_list, idxs) =
 // Function: obj_select_by_attr_defined()
 // Usage:
 //   list = obj_select_by_attr_defined(obj_list, attr);
+//
 // Description:
 //   Given a list of Objects `obj_list` and an attribute name `attr`, return a list of
 //   all the Objects in `obj_list` that have the attribute `attr` defined.
@@ -992,14 +993,19 @@ function obj_select_by_attr_value(obj_list, attr, value) =
 //
 function obj_sort_by_attribute(obj_list, attr) =
     let(
-        idxs = sortidx( obj_select_values_from_obj_list(obj_list, attr) )
-    )
-    obj_select(obj_list, idxs);
+        value_list = obj_select_values_from_obj_list(obj_list, attr),
+        idxs = sortidx( value_list )
+    ) (len(obj_list) == 1)
+        ? obj_list
+        : (len(value_list) == 0)
+            ? []
+            : obj_select(obj_list, idxs);
 
 
 // Function: obj_select_values_from_obj_list()
 // Usage:
 //   list = obj_select_values_from_obj_list(obj_list, attr);
+//   list = obj_select_values_from_obj_list(obj_list, attr, <default=undef>);
 // Description:
 //   Given a list of Objects `obj_list` and an attribute name `attr`, return
 //   a list of all the values of `attr` in the Objects in `obj_list`. The
@@ -1011,10 +1017,125 @@ function obj_sort_by_attribute(obj_list, attr) =
 //   obj_list = A list of Objects
 //   attr = An attribute name
 //   ---
-//   default = A value to be used as a default for Objects that do not have their attribute `attr` set. Default: undef
+//   default = A value to be used as a default for Objects that do not have their attribute `attr` set. Default: `undef`
 //
 function obj_select_values_from_obj_list(obj_list, attr, default=undef) =
-    [ for (obj=obj_list) (obj_has(obj, attr)) ? obj_accessor_get(obj, attr, default=default) : undef ];
+    [ for (obj=obj_list) (obj_has(obj, attr)) 
+        ? obj_accessor_get(obj, attr, default=default) 
+        : undef ];
+
+
+// Function: obj_regroup_list_by_attr()
+// Usage:
+//   list = obj_regroup_list_by_attr(obj_list, attr);
+//
+// Description:
+//   Given a list of Objects `obj_list` and an attribute name `attr`, 
+//   return a list of groups of the Objects in `obj_list` grouped
+//   by defined and unique values of `attr`. 
+//   .
+//   The groupings of Objects are returned in no particular order. 
+//   .
+//   Objects listed in `obj_list` need not be all of the same type.
+//
+// Arguments:
+//   obj_list = A list of Objects
+//   attr = An attribute name
+//
+// Continues:
+//   If an Object within `obj_list` has the attribute `attr` but 
+//   it is neither defined nor has a default value, it will not 
+//   be grouped. Grouping Objects with an `undef` value for the 
+//   attribute is something that'd be *nice*; however, the 
+//   functions `obj_regroup_list_by_attr()` depends on do not 
+//   today support selecting Objects on an undefined attribute.
+//
+function obj_regroup_list_by_attr(obj_list, attr) = 
+    let(
+        unique_attrs = unique(
+            list_remove_values(
+                obj_select_values_from_obj_list(
+                    obj_list,
+                    attr),
+                undef,
+                all=true))
+    ) [ for (v=unique_attrs) obj_select_by_attr_value(obj_list, attr, v) ];
+
+
+// Function: obj_select_by_attrs_values()
+// Usage:
+//   list = obj_select_by_attrs_values(obj_list, arglist);
+//
+// Description:
+//   Given a list of Objects `obj_list` and a list of selectors `arglist`, 
+//   recursively examine `obj_list` to select items that match each selector, and 
+//   return those elements as `list`. The elements in `list` are returned in 
+//   the order they appear in `obj_list`. 
+//   . 
+//   For `obj_select_by_attrs_values()`, the `arglist` list of selectors is a collection of `[attr, value]` 
+//   lists that are used to exclude items from `obj_list`. `attr` is the object attribute
+//   to examine, and `value` is the value that it must match in order to be returned. 
+//   In brief, `obj_select_by_attrs_values()` is calling `obj_select_by_attr_value()` 
+//   for each pairing in `arglist` against the same `obj_list` over and over, ideally 
+//   reducing the number of elements in `obj_list` to get the desired set. *(You could 
+//   probably achieve the same by getting the results of `obj_select_by_attr_value()`
+//   for each selector, and then calculating the intersection of all those results; 
+//   however, `obj_select_by_attrs_values()` is probably going to be faster, since 
+//   `obj_list` is likely to be shortened for each recurively-examined selector.)*
+//   .
+//   The Objects in `obj_list` need not be all the same type, however they all 
+//   need to support the `arglist` selectors.
+//
+// Arguments:
+//   obj_list = A list of Objects
+//   arglist = A list of `[attr, value]` lists, where: `attr` is an attribute name; and, `value` is a comparison value
+//
+// See also: obj_select_by_attr_value()
+function obj_select_by_attrs_values(obj_list, arglist) = _rec_obj_select_by_attrs_values(obj_list, arglist);
+
+function _rec_obj_select_by_attrs_values(obj_list, arglist, _id=0, _max=undef) =
+    assert(_defined(obj_list))
+    assert(_defined(arglist))
+    assert(is_list(arglist))
+    let(
+        max_ = (_defined(_max)) 
+            ? _max 
+            : max([ for (i=obj_list) obj_toc_attr_len(i) ])
+    )
+    assert(_id < max_ + 1)
+    let(
+        current_selector = arglist[0],
+
+        adjusted_list = obj_select_by_attr_value(
+            obj_list, 
+            current_selector[0], 
+            current_selector[1]),
+
+        arglist_remainder = (len(arglist) == 1)
+            ? []
+            : (len(arglist) > 2)
+                ? select(arglist, 1)
+                : [list(arglist[1])]
+    ) 
+    (len(arglist_remainder) > 0)
+        ? _rec_obj_select_by_attrs_values(
+            adjusted_list, 
+            arglist_remainder, 
+            _id=_id+1, 
+            _max=max_)
+        : adjusted_list;
+
+
+// Function: obj_list_debug_obj()
+// Usage:
+//   list = obj_list_debug_obj(obj_list);
+// Description:
+//   Given a list of Objects `obj_list`, run `obj_debug_obj()` on each 
+//   Object, and return their output as a list. 
+// Arguments:
+//   obj_list = A list of Objects
+//
+function obj_list_debug_obj(obj_list) = [ for (obj=obj_list) obj_debug_obj(obj) ];
 
 
 // ------------------------------------------------------------------------------------------------------------
