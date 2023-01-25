@@ -122,3 +122,47 @@ module test_obj_sort_by_attribute() {
 test_obj_sort_by_attribute();
 
 
+module test_obj_regroup_list_by_attr() {
+    r1 = obj_regroup_list_by_attr(obj_listing, "estr");
+    shape1 = list_shape(r1);
+    assert(shape1[0] == 2,
+        str("expected two elements when grouping with estr, got ", shape1[0]));
+    r1_0_cstr = sort( obj_select_values_from_obj_list(r1[0], "cstr") );
+    assert(r1_0_cstr == ["alpha", "charlie"],
+        str("expected first elements in r1 must be ['alpha', 'charlie']: ", r1_0_cstr));
+    
+    r2 = obj_regroup_list_by_attr(obj_listing, "dint");
+    shape2 = list_shape(r2);
+    assert(shape2[0] == 3,
+        str("expected 3 elements when grouping with dint, got ", shape2[0]));
+}
+test_obj_regroup_list_by_attr();
+
+
+module test_obj_select_by_attrs_values() {
+    s1_comp = [ TestObj(["aint", 2, "bint", undef, "cstr", "echo", "dint", 2, "estr", "bbb" ]) ];
+
+    s1 = obj_select_by_attrs_values(obj_listing, [ ["estr", "bbb"], ["cstr", "echo"] ]);
+    assert(len(s1) == 1,
+        str("returned list must be one element long"));
+    assert(s1 == s1_comp,
+        str("returned list must match comparison list"));
+    
+    s2_comp = [ TestObj(["aint", 4, "bint", 14, "cstr", "alpha", "dint", 1, "estr", "aaa" ]) ];
+    s2 = obj_select_by_attrs_values(obj_listing, [["cstr", "alpha"]]);
+    assert(len(s2) == 1,
+        str("returned list must be 1"));
+    assert(s2 == s2_comp,
+        str("returned list must be the same as the source list", s2, s2_comp));
+
+    s3_comp = [];
+    s3 = obj_select_by_attrs_values(obj_listing, [["cstr", "unmatched"]]);
+    assert(len(s3) == 0,
+        str("returned list must be 0"));
+    assert(s3 == s3_comp,
+        str("returned list must be the same as the source list (eg, empty)"));
+    
+}
+test_obj_select_by_attrs_values();
+
+
