@@ -55,6 +55,9 @@ To use, add the following lines to the beginning of your file:
     - [`obj_select_by_attr_value()`](#function-obj_select_by_attr_value)
     - [`obj_sort_by_attribute()`](#function-obj_sort_by_attribute)
     - [`obj_select_values_from_obj_list()`](#function-obj_select_values_from_obj_list)
+    - [`obj_regroup_list_by_attr()`](#function-obj_regroup_list_by_attr)
+    - [`obj_select_by_attrs_values()`](#function-obj_select_by_attrs_values)
+    - [`obj_list_debug_obj()`](#function-obj_list_debug_obj)
     - [`ATTRIBUTE_DATA_TYPES`](#constant-attribute_data_types)
     - [`obj_type_is_valid()`](#function-obj_type_is_valid)
     - [`obj_type_check_value()`](#function-obj_type_check_value)
@@ -1217,6 +1220,7 @@ Objects listed in `obj_list` need not be all of the same type.
 **Usage:** 
 
 - list = obj\_select\_values\_from\_obj\_list(obj\_list, attr);
+- list = obj\_select\_values\_from\_obj\_list(obj\_list, attr, &lt;default=undef&gt;);
 
 **Description:** 
 
@@ -1235,7 +1239,95 @@ The Objects in `obj_list` need not be all the same type.
 
 <abbr title="These args must be used by name, ie: name=value">By&nbsp;Name</abbr> | What it does
 -------------------- | ------------
-`default`            | A value to be used as a default for Objects that do not have their attribute `attr` set. Default: undef
+`default`            | A value to be used as a default for Objects that do not have their attribute `attr` set. Default: `undef`
+
+---
+
+### Function: obj\_regroup\_list\_by\_attr()
+
+**Usage:** 
+
+- list = obj\_regroup\_list\_by\_attr(obj\_list, attr);
+
+**Description:** 
+
+Given a list of Objects `obj_list` and an attribute name `attr`,
+return a list of groups of the Objects in `obj_list` grouped
+by defined and unique values of `attr`.
+
+The groupings of Objects are returned in no particular order.
+
+Objects listed in `obj_list` need not be all of the same type.
+
+**Arguments:** 
+
+<abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
+-------------------- | ------------
+`obj_list`           | A list of Objects
+`attr`               | An attribute name
+
+
+If an Object within `obj_list` has the attribute `attr` but
+it is neither defined nor has a default value, it will not
+be grouped. Grouping Objects with an `undef` value for the
+attribute is something that'd be *nice*; however, the
+functions `obj_regroup_list_by_attr()` depends on do not
+today support selecting Objects on an undefined attribute.
+
+---
+
+### Function: obj\_select\_by\_attrs\_values()
+
+**Usage:** 
+
+- list = obj\_select\_by\_attrs\_values(obj\_list, arglist);
+
+**Description:** 
+
+Given a list of Objects `obj_list` and a list of selectors `arglist`,
+recursively examine `obj_list` to select items that match each selector, and
+return those elements as `list`. The elements in `list` are returned in
+the order they appear in `obj_list`.
+
+For `obj_select_by_attrs_values()`, the `arglist` list of selectors is a collection of `[attr, value]`
+lists that are used to exclude items from `obj_list`. `attr` is the object attribute
+to examine, and `value` is the value that it must match in order to be returned.
+In brief, `obj_select_by_attrs_values()` is calling `obj_select_by_attr_value()`
+for each pairing in `arglist` against the same `obj_list` over and over, ideally
+reducing the number of elements in `obj_list` to get the desired set. *(You could
+probably achieve the same by getting the results of `obj_select_by_attr_value()`
+for each selector, and then calculating the intersection of all those results;
+however, `obj_select_by_attrs_values()` is probably going to be faster, since
+`obj_list` is likely to be shortened for each recurively-examined selector.)*
+
+The Objects in `obj_list` need not be all the same type, however they all
+need to support the `arglist` selectors.
+
+**Arguments:** 
+
+<abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
+-------------------- | ------------
+`obj_list`           | A list of Objects
+`arglist`            | A list of `[attr, value]` lists, where: `attr` is an attribute name; and, `value` is a comparison value
+
+---
+
+### Function: obj\_list\_debug\_obj()
+
+**Usage:** 
+
+- list = obj\_list\_debug\_obj(obj\_list);
+
+**Description:** 
+
+Given a list of Objects `obj_list`, run `obj_debug_obj()` on each
+Object, and return their output as a list.
+
+**Arguments:** 
+
+<abbr title="These args can be used by position or by name.">By&nbsp;Position</abbr> | What it does
+-------------------- | ------------
+`obj_list`           | A list of Objects
 
 ---
 
