@@ -145,6 +145,7 @@ function _rec_assign_vlist_to_obj(obj, vlist) =
 function obj_is_obj(obj) = 
     (is_list(obj))                                          // "Object base type must be a list")
         && (_defined(obj[0]))                               // "First element in object list must be defined"
+        && (is_list(obj[0]))                                // "First element in object list must be a list"
         && (len(obj[0]) == len(obj))                        // "Objects must have the same number of elements and attributes in its TOC")
         && (list_shape(list_tail(obj_toc_get_attributes(obj), 1), 1) == 3);  // "Attributes and type pairing within the TOC must be consistent, and must be 2")
 
