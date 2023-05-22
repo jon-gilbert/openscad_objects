@@ -198,12 +198,18 @@ function obj_debug_obj(obj, ws="", sub_defaults=false, show_defaults=true) =
         debug_data = [
             for( i=[1:obj_toc_attr_len(obj)] ) 
                 str(ws, 
+                    // attribute id name: "1: x"
                     i, ": ", obj_toc_attr_name_by_id(obj, i), 
+
+                    // attribute type & default value: " (s: x)"
                     " (", obj_toc_get_attr_types(obj)[i], 
-                        (show_defaults && _defined(obj_toc_get_attr_default_by_id(obj, i)))
+                        (show_defaults)
                             ? str(": ", obj_toc_get_attr_default_by_id(obj, i))
                             : "",
                     "): ", 
+
+                    // attribute value; if it's an object, recurse 
+                    // into obj_debug_obj()
                     (obj_toc_get_attr_types(obj)[i] == "o" 
                             && _defined(obj_accessor_get(obj, 
                                 obj_toc_attr_name_by_id(obj, i), 
@@ -570,7 +576,9 @@ function attr_type_default_from_string_or_pairs(tuple) =
             ? undef 
             : (_defined(attr_type) && _defined(_attr_default) && _type_check_value(attr_type, _attr_default))
                 ? _attr_default
-                : undef
+                : (attr_type == "l" && !_defined(_attr_default))
+                    ? []  // Special case for using empty lists as a default
+                    : undef
         )
     assert(_defined(attr_name),
         str("attr_type_default_from_string_or_pairs(): No attribute ",
@@ -595,7 +603,7 @@ function _attr_type_default_from_string_recast(type, value_as_string) =
                         : (type == "s")
                             ? value_as_string
                             : (type == "l" || type == "o")
-                                ? undef  // not EVEN gonna try to parse that out
+                                ? []     // non-defined default type list, needs to be returned as empty list
                                 : undef  // fall-through. 
     ) v;
 
@@ -766,9 +774,16 @@ function obj_accessor(obj, name, default=undef, nv=undef, _consider_toc_default_
         id = (_defined(obj) && _defined(name)) 
             ? obj_toc_attr_id_by_name(obj, name) 
             : undef,
+        type = obj_toc_get_attr_type_by_id(obj, id),
         toc_default = (_defined(id) && _consider_toc_default_values)
             ? obj_toc_get_attr_default_by_id(obj, id)
-            : undef
+            : (type == "l")
+                ? []
+                : undef,
+        current_value_ = _first([obj[id], default, toc_default, undef]),
+        current_value = (type == "l" && !_defined(current_value_))
+            ? []
+            : current_value_
     )        
     (_defined(nv))
         ? (id == 0)
@@ -778,9 +793,9 @@ function obj_accessor(obj, name, default=undef, nv=undef, _consider_toc_default_
                 ? list_set(obj, id, nv)
                 : assert(false, str("obj_accessor(): new value for '", name, 
                     "' doesn't match that attribute's type of '"))
-        : (!_defined(id))
+        : (!_defined(id))  // BRAK: under what circumstances is an undefined ID an ok state?
             ? default
-            : _first([obj[id], default, toc_default, undef]);
+            : current_value;
 
 
 // Function: obj_accessor_get()
