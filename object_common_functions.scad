@@ -774,14 +774,18 @@ function obj_accessor(obj, name, default=undef, nv=undef, _consider_toc_default_
         id = (_defined(obj) && _defined(name)) 
             ? obj_toc_attr_id_by_name(obj, name) 
             : undef,
-        type = obj_toc_get_attr_type_by_id(obj, id),
+        type = (_defined(id))
+            ? obj_toc_get_attr_type_by_id(obj, id)
+            : undef,
         toc_default = (_defined(id) && _consider_toc_default_values)
             ? obj_toc_get_attr_default_by_id(obj, id)
             : (type == "l")
                 ? []
                 : undef,
-        current_value_ = _first([obj[id], default, toc_default, undef]),
-        current_value = (type == "l" && !_defined(current_value_))
+        current_value_ = (_defined(id))
+            ? _first([obj[id], default, toc_default, undef])
+            : default,
+        current_value = (_defined(type) && type == "l" && !_defined(current_value_))
             ? []
             : current_value_
     )        
@@ -793,9 +797,7 @@ function obj_accessor(obj, name, default=undef, nv=undef, _consider_toc_default_
                 ? list_set(obj, id, nv)
                 : assert(false, str("obj_accessor(): new value for '", name, 
                     "' doesn't match that attribute's type of '"))
-        : (!_defined(id))  // BRAK: under what circumstances is an undefined ID an ok state?
-            ? default
-            : current_value;
+        : current_value;
 
 
 // Function: obj_accessor_get()

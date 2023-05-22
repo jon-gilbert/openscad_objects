@@ -193,8 +193,9 @@ module test_obj_accessor() {
 
     // test to see if we can successfully get back nothing with an undefined object
     // UPDATE as of 'issue-9': undefined values as objects? Is this REALLY a supportable case?
-    //o6 = undef;
-    //assert( obj_accessor(o6, "string", default="default") == "default" );
+    // UPDATE as of 'issue-10': Yes; this for now needs supporting
+    o6 = undef;
+    assert( obj_accessor(o6, "string", default="default") == "default" );
 
     // this should error out, and there's no way in OpenSCAD to trap exceptions:
     //assert( obj_accessor(o6, "string" ) == "undef" );
