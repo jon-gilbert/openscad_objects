@@ -27,7 +27,7 @@ module test_obj_default_args() {
     assert( obj_accessor_get(v, "b_false") == false );
     assert( obj_accessor_get(v, "b_true") == true );
     assert( obj_accessor_get(v, "undefined") == undef );
-    assert( obj_accessor_get(v, "list") == undef );
+    assert( obj_accessor_get(v, "list") == [] );
     assert( obj_accessor_get(v, "proper_list") == [1, 2] );
     assert( obj_accessor_get(v, "object") == undef );
 

@@ -192,8 +192,10 @@ module test_obj_accessor() {
     assert( obj_accessor_get(o22, "boolean") == false );
 
     // test to see if we can successfully get back nothing with an undefined object
-    o6 = undef;
-    assert( obj_accessor(o6, "string", default="default") == "default" );
+    // UPDATE as of 'issue-9': undefined values as objects? Is this REALLY a supportable case?
+    //o6 = undef;
+    //assert( obj_accessor(o6, "string", default="default") == "default" );
+
     // this should error out, and there's no way in OpenSCAD to trap exceptions:
     //assert( obj_accessor(o6, "string" ) == "undef" );
 
@@ -209,7 +211,7 @@ module test_obj_tocs() {
     obj = F([]);
     assert( obj_is_obj(obj) );
     assert( obj_toc_get_type(obj) == "F" );
-    assert( obj_toc_get_attributes(obj) == [["_toc_", "o"], ["string", "s", undef], ["integer", "i", undef], ["boolean", "b", undef], ["list", "l", undef], ["undefined", "u", undef], ["object", "o", undef]], obj_toc_get_attributes(obj) ); 
+    assert( obj_toc_get_attributes(obj) == [["_toc_", "o"], ["string", "s", undef], ["integer", "i", undef], ["boolean", "b", undef], ["list", "l", []], ["undefined", "u", undef], ["object", "o", undef]], obj_toc_get_attributes(obj) ); 
     assert( obj_toc_get_attr_names(obj) == ["_toc_", "string", "integer", "boolean", "list", "undefined", "object"] );
     assert( obj_toc_get_attr_types(obj) == ["o", "s", "i", "b", "l", "u", "o"] );
 
