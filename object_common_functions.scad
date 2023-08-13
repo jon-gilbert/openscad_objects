@@ -22,7 +22,10 @@ include <BOSL2/std.scad>
 // Section: Object Functions
 //   These functions assist the creating and usage of Object-like lists ("Objects").
 //
+// Subsection: Base Object Functions
+//
 // Function: Object()
+// Synopsis: Create a generic Object
 // Description:
 //   Creates a list of values from either `vlist` or `mutate` arguments with the same indexing as 
 //   `obj_attrs`. This resulting list can be treated as a loose "object". 
@@ -130,6 +133,7 @@ function _rec_assign_vlist_to_obj(obj, vlist) =
 
 
 // Function: obj_is_obj()
+// Synopsis: Test to see if a given value could be an Object
 // Description: 
 //   Given a thing, returns true if that thing can be considered an Object, of any type. 
 //   .
@@ -151,6 +155,7 @@ function obj_is_obj(obj) =
 
 
 // Function: obj_is_valid()
+// Synopsis: Deeply test an Object to ensure its data types are consistent
 // Description:
 //   Given an object, returns `true` if the object is "valid", and `false` otherwise. "Valid" in this 
 //   context means the object is an object (as per `obj_is_obj()`); and, has at least one attribute element; whose 
@@ -170,6 +175,7 @@ function obj_value_datatype_check(obj) = !in_list(false,
 
 
 // Function: obj_debug_obj()
+// Synopsis: Given an Object, return a single string that describes the Object 
 // Description: 
 //   Given an object, return a string of debug layout information 
 //   of the object. Nested objects within the object will also 
@@ -239,6 +245,7 @@ function obj_debug_obj(obj, ws="", sub_defaults=false, show_defaults=true) =
 //   
 
 // Function: obj_build_toc()
+// Synopsis: Construct a TOC
 // Description: 
 //   Given an object name, an attribute-type set, and optionally an existing object to mutate from,
 //   construct a table-of-contents (TOC) and return it. 
@@ -257,6 +264,7 @@ function obj_build_toc(obj_name, obj_attrs, mutate) =
 
 
 // Function: obj_toc()
+// Synopsis: Get an Object's TOC
 // Description:
 //   Given an object, return that object's TOC. 
 // Usage:
@@ -267,6 +275,7 @@ function obj_toc(obj) = obj[0];
 
 
 // Function: obj_toc_get_type()
+// Synopsis: Get an Object's type from its TOC
 // Description: 
 //   Given an object, return its "type" from its TOC. If there is no TOC, an error is raised. 
 // Usage:
@@ -284,6 +293,7 @@ function obj_toc_get_type(obj) =
 
 
 // Function: obj_toc_get_attributes()
+// Synopsis: Get the list of attributes
 // Description:
 //   Given an object, return its list of attributes. This may differ from the list of 
 //   attributes in the object's TOC, because of the TOC itself.
@@ -306,6 +316,7 @@ function obj_toc_get_attributes(obj) =
 
 
 // Function: obj_toc_get_attr_names()
+// Synopsis: Get the list of attribute names
 // Description:
 //   Given an object, return its list of attribute names. 
 // Usage:
@@ -322,6 +333,7 @@ function obj_toc_get_attr_names(obj) = [ for (i=obj_toc_get_attributes(obj)) i[0
 
 
 // Function: obj_toc_get_attr_types()
+// Synopsis: Get the list of attribute types
 // Description:
 //   Given an object, return its list of attribute types. Types are 
 //   returned in the same order and index as their corresponding attributes. 
@@ -339,6 +351,7 @@ function obj_toc_get_attr_types(obj) = [ for (i=obj_toc_get_attributes(obj)) i[1
 
 
 // Function: obj_toc_get_attr_defaults()
+// Synopsis: Get the list of attribute default values
 // Description: 
 //   Given an object, return its list of attribute default values. Default values are 
 //   returned in the same order and index as their corresponding attribute names.
@@ -356,6 +369,7 @@ function obj_toc_get_attr_defaults(obj) = [ for (i=obj_toc_get_attributes(obj)) 
 
 
 // Function: obj_toc_attr_len()
+// Synopsis: Get the number of attributes in an Object
 // Description:
 //   Given an object, return the number of attributes defined for that object. 
 // Usage:
@@ -368,6 +382,7 @@ function obj_toc_attr_len(obj) = len(obj[0]) - 1;
 
 
 // Function: obj_toc_get_attr_type_by_name()
+// Synopsis: Get a data type for a particular attribute by name
 // Description:
 //   Given an object and an attribute name, return the attribute data type 
 //   expected for that attribute. 
@@ -385,6 +400,7 @@ function obj_toc_get_attr_type_by_name(obj, name) = obj_toc_get_attr_type_by_id(
 
 
 // Function: obj_toc_get_attr_type_by_id()
+// Synopsis: Get a data type for a particular attribute by ID 
 // Description:
 //   Given an object and an attribute id, return the attribute data type 
 //   expected for that attribute. 
@@ -402,6 +418,7 @@ function obj_toc_get_attr_type_by_id(obj, id) = obj_toc_get_attr_types(obj)[ id 
 
 
 // Function: obj_toc_get_attr_default_by_name()
+// Synopsis: Get an attribute's default value by name
 // Description:
 //   Given an object and an attribute name, return the attribute's default value 
 //   expected for that attribute. 
@@ -420,6 +437,7 @@ function obj_toc_get_attr_default_by_name(obj, name) = obj_toc_get_attr_default_
 
 
 // Function: obj_toc_get_attr_default_by_id()
+// Synopsis: Get an attribute's default value by ID
 // Description:
 //   Given an object and an attribute id, return the attribute's default value
 //   expected for that attribute.
@@ -438,6 +456,7 @@ function obj_toc_get_attr_default_by_id(obj, id) = obj_toc_get_attr_defaults(obj
 
 
 // Function: obj_toc_attr_id_by_name()
+// Synopsis: Translate an attribute's name into an ID
 // Usage:
 //   obj_addr_id_by_name(object, name);
 // Description:
@@ -478,6 +497,7 @@ function obj_toc_attr_id_by_name(obj, name) =
 
 
 // Function: obj_toc_attr_name_by_id()
+// Synopsis: Translate an attribute's ID into a name
 // Usage:
 //   obj_toc_attr_name_by_id(object, id);
 // Description:
@@ -516,6 +536,7 @@ function obj_toc_attr_name_by_id(obj, id) =
 
 
 // Function: attr_arglist_to_vlist()
+// Synopsis: Convert a single list of arguments into a vlist
 // Description:
 //   When you have an existing object and want named module arguments to 
 //   take precedence with a mutation, attr_arglist_to_vlist() simplifies that 
@@ -538,6 +559,7 @@ function attr_arglist_to_vlist(list) = [ for (i=list_to_matrix(list, 2)) if (_de
     
 
 // Function: attr_type_default_from_string_or_pairs()
+// Synopsis: Create an identifying tuple of attribute info
 // Description:
 //   Given either a list-pair of `[attribute, type, default]`, or a string of `attribute=type=default`, 
 //   return a tuple list-pair of `[attribute, type, default]`. `attribute` should be an attribute name 
@@ -609,6 +631,7 @@ function _attr_type_default_from_string_recast(type, value_as_string) =
 
 
 // Function: obj_get_values()
+// Synopsis: Get a list of all the values in the Object
 // Description:
 //   Given an object, return the values of the attributes listed in its 
 //   TOC, as a list. This is functionally the same as doing `[for (i=[1:len(obj[0])-1]) obj[i]]`.
@@ -630,6 +653,7 @@ function obj_get_values(obj) = slice(obj, 1);
 
 
 // Function: obj_has_value()
+// Synopsis: Test to see if an Object has any data in it
 // Description:
 //   Given an object, return `true` if any one of its attributes are defined. If no attributes 
 //   have a value defined, `obj_has_value()` returns `false`. 
@@ -653,6 +677,7 @@ function obj_has_value(obj) = (_defined_len(obj_get_values(obj)) > 0) ? true : f
 
 
 // Function: obj_has()
+// Synopsis: Test to see if an Object has a particular attribute
 // Description:
 //   Given an object `obj` and an accessor name `name`, return `true` if the object "can" access 
 //   that name, or `false` otherwise. An object need not have a specified value for the given name, 
@@ -690,6 +715,7 @@ function obj_has(obj, name) = in_list(name, obj_toc_get_attr_names(obj));
 //   set a named attribute explicitly to `undef` (essentially, a delete).
 //
 // Function: obj_accessor()
+// Synopsis: Generic read/write attribute accessor
 // Description:
 //   Basic accessor for object attributes. Given an object `obj` and an attribute name `name`, operates on that attribute. 
 //   The operation depends on what other options are passed. Calls to `obj_accessor()` with an `nv` (new-value) option 
@@ -801,6 +827,7 @@ function obj_accessor(obj, name, default=undef, nv=undef, _consider_toc_default_
 
 
 // Function: obj_accessor_get()
+// Synopsis: Generic read-only attribute accessor
 // Description:
 //   Basic "get" accessor for Objects. Given an object `obj` and attribute name `name`, `obj_accessor_get()` will look the current 
 //   value of `name` up in the object and return it (a "get" operation). 
@@ -847,6 +874,7 @@ function obj_accessor_get(obj, name, nv=undef, default=undef, _consider_toc_defa
 
 
 // Function: obj_accessor_set()
+// Synopsis: Generic write-only attribute accessor
 // Description:
 //   Basic "set" accessor for Objects. Given an object `obj`, an attribute name `name`, and a new value `nv` for that 
 //   attribute, `obj_accessor_set()` will 
@@ -898,6 +926,7 @@ function obj_accessor_set(obj, name, nv, default=undef) =
 
 
 // Function: obj_accessor_unset()
+// Synopsis: Generic attribute deleter
 // Description:
 //   Basic "delete" accessor for Objects. A new Object will be returned 
 //   with the un-set attribute value. **The existing Object list is unmodified,** and a 
@@ -924,6 +953,7 @@ function obj_accessor_unset(obj, name) =
 //
 //
 // Function: obj_select()
+// Synopsis: Select Objects from a list based on their position in that list
 // Usage:
 //   list = obj_select(obj_list, idxs);
 //
@@ -950,6 +980,7 @@ function obj_select(obj_list, idxs) =
 
 
 // Function: obj_select_by_attr_defined()
+// Synopsis: Select Objects from a list if they have a particular attribute defined
 // Usage:
 //   list = obj_select_by_attr_defined(obj_list, attr);
 //
@@ -974,6 +1005,7 @@ function obj_select_by_attr_defined(obj_list, attr) =
 
 
 // Function: obj_select_by_attr_value()
+// Synopsis: Select Objects from a list based on the value of a specified attribute
 // Usage:
 //   list = obj_select_by_attr_value(obj_list, attr, value);
 // Description:
@@ -997,6 +1029,7 @@ function obj_select_by_attr_value(obj_list, attr, value) =
 
 
 // Function: obj_sort_by_attribute()
+// Synopsis: Sort a list of Objects based on a specified attribute
 // Usage:
 //   list = obj_sort_by_attribute(obj_list, attr);
 // Description:
@@ -1021,6 +1054,7 @@ function obj_sort_by_attribute(obj_list, attr) =
 
 
 // Function: obj_select_values_from_obj_list()
+// Synopsis: Get a list of values for one attribute out of a list of Objects
 // Usage:
 //   list = obj_select_values_from_obj_list(obj_list, attr);
 //   list = obj_select_values_from_obj_list(obj_list, attr, <default=undef>);
@@ -1044,6 +1078,7 @@ function obj_select_values_from_obj_list(obj_list, attr, default=undef) =
 
 
 // Function: obj_regroup_list_by_attr()
+// Synopsis: Group a list of Objects based on a specified attribute
 // Usage:
 //   list = obj_regroup_list_by_attr(obj_list, attr);
 //
@@ -1081,6 +1116,7 @@ function obj_regroup_list_by_attr(obj_list, attr) =
 
 
 // Function: obj_select_by_attrs_values()
+// Synopsis: Select Objects from a list based on one or more sets of attribute-value pairs
 // Usage:
 //   list = obj_select_by_attrs_values(obj_list, arglist);
 //
@@ -1145,6 +1181,7 @@ function _rec_obj_select_by_attrs_values(obj_list, arglist, _id=0, _max=undef) =
 
 
 // Function: obj_list_debug_obj()
+// Synopsis: Run `obj_debug_obj()` against a list of Objects
 // Usage:
 //   list = obj_list_debug_obj(obj_list);
 // Description:
@@ -1160,6 +1197,7 @@ function obj_list_debug_obj(obj_list) = [ for (obj=obj_list) obj_debug_obj(obj) 
 // Subsection: Object Attribute Data Types
 //   
 // Constant: ATTRIBUTE_DATA_TYPES
+// Synopsis: Known data types
 // Description:
 //   A list of known attribute data types. "Types" in this context are 
 //   single-character symbols that indicate what the attribute is 
@@ -1183,6 +1221,7 @@ ATTRIBUTE_DATA_TYPES = [
 
 
 // Function: obj_type_is_valid()
+// Synopsis: Test to see if a given data type is valid
 // Description:
 //   Given a type, returns `true` if the type is found within ATTRIBUTE_DATA_TYPES, or false otherwise. 
 // Usage:
@@ -1193,6 +1232,7 @@ function obj_type_is_valid(type) = in_list(type, ATTRIBUTE_DATA_TYPES);
 
 
 // Function: obj_type_check_value()
+// Synopsis: Test if a specified attribute matches its data type
 // Description:
 //   Given a valid object, an attribute `name`, and a `value`, check to see if the 
 //   value is the same data type as the attribute's type for that Object. If the 
@@ -1241,6 +1281,7 @@ function _type_check_value(type_id, value) =
 //   `flatten()`, `in_list()`, `list_insert()`, `list_pad()`, `list_set()`, `list_shape()`, and `list_to_matrix()`.
 // 
 // Function: _defined()
+// Synopsis: Good all-purpose "is this variable defined?" function
 // Description:
 //   Given a variable, return true if the variable is defined. 
 //   This doesn't differenate `true` vs `false` - `false` is still defined. 
@@ -1264,6 +1305,7 @@ function _defined(a) = (is_list(a)) ? len(a) > 0 : !is_undef(a);
 
 
 // Function: _first()
+// Synopsis: Return the first "defined" value in a list
 // Description:
 //   Given a list of values, returns the first defined (as per `_defined()`) in the list.
 //   Because we're using `_defined()` to test each value in the list, 
@@ -1285,6 +1327,7 @@ function _first(list) = [for (i = list) if (_defined(i)) i][0];
 
 
 // Function: _defined_len()
+// Synopsis: Return the number of defined elements in a list
 // Description:
 //   Given a list of values, returns the number of defined elements in that 
 //   list. If there are no elements, or if all elements are undefined, returns `0`.
