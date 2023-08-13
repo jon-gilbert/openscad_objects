@@ -2,7 +2,7 @@ name: Regen Docs
 
 on:
   workflow_run:
-    workflows: [Unit Tests]
+    workflows: [Unit tests]
     types: [completed]
 
   # Allows you to run this workflow manually from the Actions tab
