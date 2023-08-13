@@ -1,28 +1,31 @@
 // LibFile: object_common_functions.scad
 //   Functions for creating and accessing object-like lists. 
 //   .
-//   **Note:** that throughout this file and elsewhere within the 507 (a separate project not yet linkable), we loosely refer to things as 
-//   objects. I *wish* they were real, blessed, official capital-O Objects,
-//   and they're not. See docs/HOWTO.md on a quick-start minimum number of steps to get 
-//   this into your OpenSCAD modules. 
-//   .
-//   Also, throughout the examples here we talk about an "Axle" model. This is described 
-//   also in the HOWTO.md doc. It's loosely based on an actual object class in the 507, 
-//   and used as a simple, contrived example. 
+//   **Note:** throughout this LibFile, we refer to things as Objects.
+//   I *wish* they were real, blessed, official capital-O Objects,
+//   and they're not. See [this project's HOWTO wiki](https://github.com/jon-gilbert/openscad_objects/wiki/HOWTO) 
+//   for a quick-start, minimum number of steps to get this into your OpenSCAD modules. 
 //
 // FileSummary: Functions for creating and accessing object-like lists.
 // Includes:
 //   include <object_common_functions.scad>
 //
 
-// this may break within 507, and if so, comment it out. 
 include <BOSL2/std.scad>
 
 
 // Section: Object Functions
-//   These functions assist the creating and usage of Object-like lists ("Objects").
+//   .
+//
+// Subsection: Base Object Functions
+//   These functions assist the creating and usage of object-like lists: "Objects".
+//   .
+//   Objects have two basic parts: a list of attributes, their types, and default 
+//   values; and, a list attributes with their set values. The functions in this 
+//   section address the overall Object's creation and validity. 
 //
 // Function: Object()
+// Synopsis: Create a generic Object
 // Description:
 //   Creates a list of values from either `vlist` or `mutate` arguments with the same indexing as 
 //   `obj_attrs`. This resulting list can be treated as a loose "object". 
@@ -130,6 +133,7 @@ function _rec_assign_vlist_to_obj(obj, vlist) =
 
 
 // Function: obj_is_obj()
+// Synopsis: Test to see if a given value could be an Object
 // Description: 
 //   Given a thing, returns true if that thing can be considered an Object, of any type. 
 //   .
@@ -151,6 +155,7 @@ function obj_is_obj(obj) =
 
 
 // Function: obj_is_valid()
+// Synopsis: Deeply test an Object to ensure its data types are consistent
 // Description:
 //   Given an object, returns `true` if the object is "valid", and `false` otherwise. "Valid" in this 
 //   context means the object is an object (as per `obj_is_obj()`); and, has at least one attribute element; whose 
@@ -170,6 +175,7 @@ function obj_value_datatype_check(obj) = !in_list(false,
 
 
 // Function: obj_debug_obj()
+// Synopsis: Given an Object, return a single string that describes the Object 
 // Description: 
 //   Given an object, return a string of debug layout information 
 //   of the object. Nested objects within the object will also 
@@ -234,11 +240,39 @@ function obj_debug_obj(obj, ws="", sub_defaults=false, show_defaults=true) =
 // --------------------------------------------------------------------------------------------------------------------------------
 // Subsection: Object Table-of-Contents Functions
 //   These are functions specific to interacting with an Object's Table-of-Contents (TOC). 
-//   In general these aren't really functions you'd need in your day-to-day model. In particular, 
-//   functions without given examples probably should be shied away from.
-//   
-
+//   .
+//   The TOC is a list of attributes that belong to the object, the attribute's data types, 
+//   and their default values. The TOC is the first element in the Object; 
+//   and, it must be the same length as the Object. The attributes listed in the 
+//   TOC must be ordered the same as the attribute values in the Object.
+//   .
+//   For example, if you had an Axle Object with two attributes ("length" and "diameter"), 
+//   the TOC would have three elements within it: the Object type, and a default value and
+//   data type for both of the attributes. 
+//   ```openscad
+//   object = [
+//      // this first element is the TOC:
+//      [
+//         ["Axle"],
+//         ["length", "i", 10],
+//         ["diameter", "i", 10]
+//         ], 
+//      // this is the value of the 'length' attribute:
+//      undef, 
+//      // this is the value of the 'diameter' attribute:
+//      undef
+//      ];
+//   ``` 
+//   There are two attributes listed in the above example TOC, and there are two 
+//   attribute values in the Object. In this above example, the attributes are currently 
+//   unset, but they'll always be present. 
+//   .
+//   In general the functions in this section aren't really functions you'd need in your 
+//   day-to-day modeling. 
+// 
+//
 // Function: obj_build_toc()
+// Synopsis: Construct a TOC
 // Description: 
 //   Given an object name, an attribute-type set, and optionally an existing object to mutate from,
 //   construct a table-of-contents (TOC) and return it. 
@@ -257,6 +291,7 @@ function obj_build_toc(obj_name, obj_attrs, mutate) =
 
 
 // Function: obj_toc()
+// Synopsis: Get an Object's TOC
 // Description:
 //   Given an object, return that object's TOC. 
 // Usage:
@@ -267,6 +302,7 @@ function obj_toc(obj) = obj[0];
 
 
 // Function: obj_toc_get_type()
+// Synopsis: Get an Object's type from its TOC
 // Description: 
 //   Given an object, return its "type" from its TOC. If there is no TOC, an error is raised. 
 // Usage:
@@ -284,6 +320,7 @@ function obj_toc_get_type(obj) =
 
 
 // Function: obj_toc_get_attributes()
+// Synopsis: Get the list of attributes
 // Description:
 //   Given an object, return its list of attributes. This may differ from the list of 
 //   attributes in the object's TOC, because of the TOC itself.
@@ -306,6 +343,7 @@ function obj_toc_get_attributes(obj) =
 
 
 // Function: obj_toc_get_attr_names()
+// Synopsis: Get the list of attribute names
 // Description:
 //   Given an object, return its list of attribute names. 
 // Usage:
@@ -322,6 +360,7 @@ function obj_toc_get_attr_names(obj) = [ for (i=obj_toc_get_attributes(obj)) i[0
 
 
 // Function: obj_toc_get_attr_types()
+// Synopsis: Get the list of attribute types
 // Description:
 //   Given an object, return its list of attribute types. Types are 
 //   returned in the same order and index as their corresponding attributes. 
@@ -339,6 +378,7 @@ function obj_toc_get_attr_types(obj) = [ for (i=obj_toc_get_attributes(obj)) i[1
 
 
 // Function: obj_toc_get_attr_defaults()
+// Synopsis: Get the list of attribute default values
 // Description: 
 //   Given an object, return its list of attribute default values. Default values are 
 //   returned in the same order and index as their corresponding attribute names.
@@ -356,6 +396,7 @@ function obj_toc_get_attr_defaults(obj) = [ for (i=obj_toc_get_attributes(obj)) 
 
 
 // Function: obj_toc_attr_len()
+// Synopsis: Get the number of attributes in an Object
 // Description:
 //   Given an object, return the number of attributes defined for that object. 
 // Usage:
@@ -368,6 +409,7 @@ function obj_toc_attr_len(obj) = len(obj[0]) - 1;
 
 
 // Function: obj_toc_get_attr_type_by_name()
+// Synopsis: Get a data type for a particular attribute by name
 // Description:
 //   Given an object and an attribute name, return the attribute data type 
 //   expected for that attribute. 
@@ -385,6 +427,7 @@ function obj_toc_get_attr_type_by_name(obj, name) = obj_toc_get_attr_type_by_id(
 
 
 // Function: obj_toc_get_attr_type_by_id()
+// Synopsis: Get a data type for a particular attribute by ID 
 // Description:
 //   Given an object and an attribute id, return the attribute data type 
 //   expected for that attribute. 
@@ -402,6 +445,7 @@ function obj_toc_get_attr_type_by_id(obj, id) = obj_toc_get_attr_types(obj)[ id 
 
 
 // Function: obj_toc_get_attr_default_by_name()
+// Synopsis: Get an attribute's default value by name
 // Description:
 //   Given an object and an attribute name, return the attribute's default value 
 //   expected for that attribute. 
@@ -420,6 +464,7 @@ function obj_toc_get_attr_default_by_name(obj, name) = obj_toc_get_attr_default_
 
 
 // Function: obj_toc_get_attr_default_by_id()
+// Synopsis: Get an attribute's default value by ID
 // Description:
 //   Given an object and an attribute id, return the attribute's default value
 //   expected for that attribute.
@@ -438,6 +483,7 @@ function obj_toc_get_attr_default_by_id(obj, id) = obj_toc_get_attr_defaults(obj
 
 
 // Function: obj_toc_attr_id_by_name()
+// Synopsis: Translate an attribute's name into an ID
 // Usage:
 //   obj_addr_id_by_name(object, name);
 // Description:
@@ -478,6 +524,7 @@ function obj_toc_attr_id_by_name(obj, name) =
 
 
 // Function: obj_toc_attr_name_by_id()
+// Synopsis: Translate an attribute's ID into a name
 // Usage:
 //   obj_toc_attr_name_by_id(object, id);
 // Description:
@@ -516,6 +563,7 @@ function obj_toc_attr_name_by_id(obj, id) =
 
 
 // Function: attr_arglist_to_vlist()
+// Synopsis: Convert a single list of arguments into a vlist
 // Description:
 //   When you have an existing object and want named module arguments to 
 //   take precedence with a mutation, attr_arglist_to_vlist() simplifies that 
@@ -538,6 +586,7 @@ function attr_arglist_to_vlist(list) = [ for (i=list_to_matrix(list, 2)) if (_de
     
 
 // Function: attr_type_default_from_string_or_pairs()
+// Synopsis: Create an identifying tuple of attribute info
 // Description:
 //   Given either a list-pair of `[attribute, type, default]`, or a string of `attribute=type=default`, 
 //   return a tuple list-pair of `[attribute, type, default]`. `attribute` should be an attribute name 
@@ -609,6 +658,7 @@ function _attr_type_default_from_string_recast(type, value_as_string) =
 
 
 // Function: obj_get_values()
+// Synopsis: Get a list of all the values in the Object
 // Description:
 //   Given an object, return the values of the attributes listed in its 
 //   TOC, as a list. This is functionally the same as doing `[for (i=[1:len(obj[0])-1]) obj[i]]`.
@@ -630,6 +680,7 @@ function obj_get_values(obj) = slice(obj, 1);
 
 
 // Function: obj_has_value()
+// Synopsis: Test to see if an Object has any data in it
 // Description:
 //   Given an object, return `true` if any one of its attributes are defined. If no attributes 
 //   have a value defined, `obj_has_value()` returns `false`. 
@@ -653,6 +704,7 @@ function obj_has_value(obj) = (_defined_len(obj_get_values(obj)) > 0) ? true : f
 
 
 // Function: obj_has()
+// Synopsis: Test to see if an Object has a particular attribute
 // Description:
 //   Given an object `obj` and an accessor name `name`, return `true` if the object "can" access 
 //   that name, or `false` otherwise. An object need not have a specified value for the given name, 
@@ -682,7 +734,39 @@ function obj_has(obj, name) = in_list(name, obj_toc_get_attr_names(obj));
 
 
 // Subsection: Object Base Accessors
-//   The attribute accessors. There's one mutatable accessor, `obj_accessor()`, that 
+//   These are the Object attribute accessors; functions that "get" and "set" the 
+//   attribute values in the Object. 
+//   .
+//   "Getting" an attribute's value from Object is pretty easy: take the attribute 
+//   name, look it up in the TOC to get its index, and use that index to get the 
+//   entry from the Object. If there's no value within the Object and a 
+//   default is available, return that instead. Works pretty much like every 
+//   other OO model out there, easy-peasy. 
+//   ```openscad
+//      axle = Object("Axle", [["diameter", "i"], ["length", "i"]], 
+//                            [["diameter", 10],  ["length", undef]]);
+//      echo( obj_accessor_get(axle, "diameter") );
+//      // ECHO: 10
+//   ```
+//   .
+//   "Setting" an attribute's value is a little more interesting, because OpenSCAD 
+//   doesn't let you change a variable after it's been declared: in other languages, 
+//   the data for a class or object is mutatable and liable to change, but in 
+//   OpenSCAD you can't do that. So: instead of returning the new value, or 
+//   a "you changed this value" success flag, setting an attribute's value returns 
+//   _an entirely new Object_. The new Object has the newly-set attribute value, 
+//   and the original Object is unmodified.
+//   ```openscad
+//      axle = Object("Axle", [["diameter", "i"], ["length", "i"]], 
+//                            [["diameter", 10],  ["length", undef]]);
+//      echo( obj_accessor_get(axle, "length") );
+//      // ECHO: undef
+//      axle2 = obj_accessor_set(axle, "length", nv=30);
+//      echo( obj_accessor_get(axle2, "length") );
+//      // ECHO: 30
+//   ```
+//   .
+//   There's one mutatable accessor, `obj_accessor()`, that 
 //   can both `get` and `set` values by attribute name. There are also 
 //   two get- and set-specific accessors: `obj_accessor_get()` returns attributes in a 
 //   read-only manner; and, `obj_accessor_set()` returns a modifed object list after 
@@ -690,6 +774,7 @@ function obj_has(obj, name) = in_list(name, obj_toc_get_attr_names(obj));
 //   set a named attribute explicitly to `undef` (essentially, a delete).
 //
 // Function: obj_accessor()
+// Synopsis: Generic read/write attribute accessor
 // Description:
 //   Basic accessor for object attributes. Given an object `obj` and an attribute name `name`, operates on that attribute. 
 //   The operation depends on what other options are passed. Calls to `obj_accessor()` with an `nv` (new-value) option 
@@ -716,13 +801,13 @@ function obj_has(obj, name) = in_list(name, obj_toc_get_attr_names(obj));
 //   name = The attribute name to access. The name must be present in `obj`'s TOC. No default. 
 //   ---
 //   default = If provided, and if there is no existing value for `name` in the object `obj`, returns the value of `default` instead. 
-//   nv = If provided, `accessor()` will update the value of the `name` attribute and return a new Object list. *The existing Object list is unmodified.*
+//   nv = If provided, `obj_accessor()` will update the value of the `name` attribute and return a new Object list. *The existing Object list is unmodified.*
 //   _consider_toc_default_values = If enabled, TOC-stored defaults will be returned according to the mechanics above. If disabled with `false`, the TOC default for a given attribute will not be considered as a viable return value. Default: `true`
 //
 // Continues:
 //   It's not an error to provide both `default` and `nv` in the same request, but doing so will yield a warning 
 //   nonetheless. If they're both present, `obj_accessor()` will act on the new value in `nv` and return a new object 
-//   list, and not evaluate or set the value from `default`. 
+//   list, and will neither evaluate nor set the value from `default`. 
 //   .
 //   It's not an error to provide a `nv` argument that is `undef`; however, if you're unknowningly passing `undef` with `nv` 
 //   expecting it to clear the attribute in that object, or because you thought it was set to a value, `obj_accessor()` 
@@ -731,27 +816,31 @@ function obj_has(obj, name) = in_list(name, obj_toc_get_attr_names(obj));
 //   `obj_accessor_set()` (which will error out if `nv` is not defined). 
 //
 // Example: direct "get" call to `obj_accessor()`:
-//   axle = Axle(["length", 30]]);
+//   axle = Axle(["length", 30]);
 //   length = obj_accessor(axle, "length");
 //   // length == 30
 //   diameter = obj_accessor(axle, "diameter", default=10);
 //   // diameter == 10
 //   // (diameter is unset in the `axle` object, so the default of 10 is returned instead)
+//
 // Example: direct "set" calls to `obj_accessor()`:
-//   axle = Axle([["length", 30]]);
+//   axle = Axle(["length", 30]);
 //   new_axle = obj_accessor(axle, "length", nv=6);
 //   // new_axle's `length` value is now 6. 
 //   // axle's `length` value is still 30.
+//
 // Example: gotcha when providing `undef` as a new-value:
 //   axle = Axle([["diameter", 10], ["length", 30]]);
 //   new_axle = obj_accessor(axle, "length", nv=undef);
-//   // new_axle == 6, because obj_accessor() didn't see a value for nv, and returned the "length" attribute instead.
+//   // new_axle == 6, because obj_accessor() didn't see a value for `nv`, and instead of changing "length", its value was returned
+//
 // Example: providing a class-specific "glue" accessor:
 //   function axle_acc(axle, name, default=undef, nv=undef) = obj_accesor(axle, name, default, nv);
 //   // ..
 //   axle = Axle([["diameter", 10], ["length", 30]]);
 //   dia = axle_acc(axle, "diameter");
 //   // dia == 10
+//
 // Example: providing a class- and attribute-specific "glue" accessor:
 //   function axle_diameter(axle, default=undef, nv=undef) = obj_accessor(axle, "diameter", default=default, nv=nv);
 //   // ...
@@ -801,6 +890,7 @@ function obj_accessor(obj, name, default=undef, nv=undef, _consider_toc_default_
 
 
 // Function: obj_accessor_get()
+// Synopsis: Generic read-only attribute accessor
 // Description:
 //   Basic "get" accessor for Objects. Given an object `obj` and attribute name `name`, `obj_accessor_get()` will look the current 
 //   value of `name` up in the object and return it (a "get" operation). 
@@ -813,27 +903,33 @@ function obj_accessor(obj, name, default=undef, nv=undef, _consider_toc_default_
 //   for the object, `undef` will be returned. 
 //
 // Usage:
-//   obj_accessor_get(obj, name, <default=undef>);
+//   value = obj_accessor_get(obj, name, <default=undef>);
+//
 // Arguments:
 //   obj = An Object list. No default. 
 //   name = The attribute name to access. The name must be present in `obj`'s TOC.
 //   ---
 //   default = If provided, and if there is no existing value for `name` in the object `obj`, returns the value of `default` instead. 
 //   _consider_toc_default_values = If enabled, TOC-stored defaults will be returned according to the mechanics above. If disabled with `false`, the TOC default for a given attribute will not be considered as a viable return value. Default: `true`
+//
 // Continues:
 //   Note that `obj_accessor_get()` will accept a `nv` option, to make writing accessor glue easier, but 
 //   that `nv` option won't be evaluated or used. 
+//
 // Example: direct calls to `obj_accessor_get()`:
 //   length = obj_accessor_get(axle, "length");
+//
 // Example: passing `nv` yields no change:
 //   retr = obj_accessor_get(axle, "length", nv=25);
-//   // retr == 30 (or, whatever the Axle's `length` previously was)
+//   // retr == 30 (or, whatever the Axle's `length` previously was; the `nv` option is ignored)
+//
 // Example: providing a class- and attribute-specific "glue" read-only accessor:
 //   function get_axle_length(axle, default=undef) = obj_accesor_get(axle, "length", default=default);
 //   // ..
 //   axle = Axle([["diameter", 10], ["length", 30]]);
 //   length = get_axle_length(axle);
 //   // length == 30
+//
 function obj_accessor_get(obj, name, nv=undef, default=undef, _consider_toc_default_values=true) = 
     let(
         _ = (_defined(nv))
@@ -847,32 +943,38 @@ function obj_accessor_get(obj, name, nv=undef, default=undef, _consider_toc_defa
 
 
 // Function: obj_accessor_set()
+// Synopsis: Generic write-only attribute accessor
 // Description:
 //   Basic "set" accessor for Objects. Given an object `obj`, an attribute name `name`, and a new value `nv` for that 
-//   attribute, `obj_accessor_set()` will 
-//   return a new Object list with the updated value for that attribute. **The existing list is unmodified,** and 
-//   a wholly new Object with the new value is returned instead. 
+//   attribute, `obj_accessor_set()` will return a new Object list with the updated value for that attribute. 
+//   **The existing Object list is unmodified,** and a wholly new Object with the new value is returned instead. 
 //   .
-//   It is an error to call `obj_accessor_set()` without a new value (`nv`) passed. If the value of `name` needs to be 
-//   removed, use `obj_accessor_unset()` instead. 
+//   It is an error to call `obj_accessor_set()` without a new value (`nv`) passed. If the value of the attribute `name` 
+//   needs to be removed, use `obj_accessor_unset()` instead. 
+//
 // Usage:
-//   obj_accessor_set(obj, name, nv);
+//   new_obj = obj_accessor_set(obj, name, nv);
+//
 // Arguments:
 //   obj = An Object list. No default. 
 //   name = The attribute name to access. The name must be present in `obj`'s TOC.
 //   nv = If provided, `obj_accessor_set()` will update the value of the `name` attribute and return a new Object list. *The existing Object list is unmodified.*
+//
 // Continues:
 //   Note that `obj_accessor_set()` will accept a `default` option, to make writing accessor 
 //   glue easier, but it won't be evaluated or used. 
+//
 // Example: direct call to `obj_accessor_set()`
 //   new_axle = obj_accessor_set(axle, "length", nv=20);
 //   // new_axle's `length` attribute is now 20
+//
 // Example: providing a class- and attribute-specific "glue" write-only accessor:
 //   function set_axle_length(axle, nv) = obj_accessor_set(axle, "length", nv);
 //   // ..
 //   axle = Axle([["diameter", 10], ["length", 30]]);
 //   new_axle = set_axle_length(axle, 40);
 //   // new_axle == [["Axle", "diameter", "length"], 10, 40];
+//
 // Example: gotchas when setting undefined values with `obj_accessor()`:
 //   // Setting no value in `nv` will *not* do what you want!
 //   function set_axle_length(axle, nv=undef) = obj_accessor(axle, "length", nv);
@@ -881,6 +983,7 @@ function obj_accessor_get(obj, name, nv=undef, default=undef, _consider_toc_defa
 //   // new_axle == 30  //<--- This is the `length` value, NOT a new object. 
 //   // Because the `nv` option wasn't provided, the call arrived into `obj_accessor()` as `undef`, and 
 //   // was treated as a "get". 
+//
 function obj_accessor_set(obj, name, nv, default=undef) = 
     assert(_defined(name), str("obj_accessor_set(): attribute name must ",
         "be provided; called with: ", name))
@@ -898,21 +1001,27 @@ function obj_accessor_set(obj, name, nv, default=undef) =
 
 
 // Function: obj_accessor_unset()
+// Synopsis: Generic attribute deleter
 // Description:
 //   Basic "delete" accessor for Objects. A new Object will be returned 
 //   with the un-set attribute value. **The existing Object list is unmodified,** and a 
 //   wholly new Object list with the unset value is returned instead. 
+//
 // Usage:
-//   obj_accessor_unset(obj, name);
+//   new_obj = obj_accessor_unset(obj, name);
+//
 // Arguments:
 //   obj = An Object list. No default. 
 //   name = The attribute name to access. The name must be present in `obj`'s TOC.
+//
 // Example:
 //   axle = Axle([["diameter", 10], ["length", 30]]);
 //   new_axle = obj_accessor_unset(axle, "length");
 //   // new_axle == [["Axle", "diameter", "length"], 10, undef];
+//
 // EXTERNAL - 
 //   list_set() (BOSL2);
+//
 function obj_accessor_unset(obj, name) = 
     list_set(obj, obj_toc_attr_id_by_name(obj, name), undef);
 
@@ -924,6 +1033,7 @@ function obj_accessor_unset(obj, name) =
 //
 //
 // Function: obj_select()
+// Synopsis: Select Objects from a list based on their position in that list
 // Usage:
 //   list = obj_select(obj_list, idxs);
 //
@@ -950,6 +1060,7 @@ function obj_select(obj_list, idxs) =
 
 
 // Function: obj_select_by_attr_defined()
+// Synopsis: Select Objects from a list if they have a particular attribute defined
 // Usage:
 //   list = obj_select_by_attr_defined(obj_list, attr);
 //
@@ -974,6 +1085,7 @@ function obj_select_by_attr_defined(obj_list, attr) =
 
 
 // Function: obj_select_by_attr_value()
+// Synopsis: Select Objects from a list based on the value of a specified attribute
 // Usage:
 //   list = obj_select_by_attr_value(obj_list, attr, value);
 // Description:
@@ -997,6 +1109,7 @@ function obj_select_by_attr_value(obj_list, attr, value) =
 
 
 // Function: obj_sort_by_attribute()
+// Synopsis: Sort a list of Objects based on a specified attribute
 // Usage:
 //   list = obj_sort_by_attribute(obj_list, attr);
 // Description:
@@ -1021,6 +1134,7 @@ function obj_sort_by_attribute(obj_list, attr) =
 
 
 // Function: obj_select_values_from_obj_list()
+// Synopsis: Get a list of values for one attribute out of a list of Objects
 // Usage:
 //   list = obj_select_values_from_obj_list(obj_list, attr);
 //   list = obj_select_values_from_obj_list(obj_list, attr, <default=undef>);
@@ -1044,6 +1158,7 @@ function obj_select_values_from_obj_list(obj_list, attr, default=undef) =
 
 
 // Function: obj_regroup_list_by_attr()
+// Synopsis: Group a list of Objects based on a specified attribute
 // Usage:
 //   list = obj_regroup_list_by_attr(obj_list, attr);
 //
@@ -1081,6 +1196,7 @@ function obj_regroup_list_by_attr(obj_list, attr) =
 
 
 // Function: obj_select_by_attrs_values()
+// Synopsis: Select Objects from a list based on one or more sets of attribute-value pairs
 // Usage:
 //   list = obj_select_by_attrs_values(obj_list, arglist);
 //
@@ -1145,6 +1261,7 @@ function _rec_obj_select_by_attrs_values(obj_list, arglist, _id=0, _max=undef) =
 
 
 // Function: obj_list_debug_obj()
+// Synopsis: Run `obj_debug_obj()` against a list of Objects
 // Usage:
 //   list = obj_list_debug_obj(obj_list);
 // Description:
@@ -1160,6 +1277,7 @@ function obj_list_debug_obj(obj_list) = [ for (obj=obj_list) obj_debug_obj(obj) 
 // Subsection: Object Attribute Data Types
 //   
 // Constant: ATTRIBUTE_DATA_TYPES
+// Synopsis: Known data types
 // Description:
 //   A list of known attribute data types. "Types" in this context are 
 //   single-character symbols that indicate what the attribute is 
@@ -1183,6 +1301,7 @@ ATTRIBUTE_DATA_TYPES = [
 
 
 // Function: obj_type_is_valid()
+// Synopsis: Test to see if a given data type is valid
 // Description:
 //   Given a type, returns `true` if the type is found within ATTRIBUTE_DATA_TYPES, or false otherwise. 
 // Usage:
@@ -1193,6 +1312,7 @@ function obj_type_is_valid(type) = in_list(type, ATTRIBUTE_DATA_TYPES);
 
 
 // Function: obj_type_check_value()
+// Synopsis: Test if a specified attribute matches its data type
 // Description:
 //   Given a valid object, an attribute `name`, and a `value`, check to see if the 
 //   value is the same data type as the attribute's type for that Object. If the 
@@ -1241,6 +1361,7 @@ function _type_check_value(type_id, value) =
 //   `flatten()`, `in_list()`, `list_insert()`, `list_pad()`, `list_set()`, `list_shape()`, and `list_to_matrix()`.
 // 
 // Function: _defined()
+// Synopsis: Good all-purpose "is this variable defined?" function
 // Description:
 //   Given a variable, return true if the variable is defined. 
 //   This doesn't differenate `true` vs `false` - `false` is still defined. 
@@ -1264,6 +1385,7 @@ function _defined(a) = (is_list(a)) ? len(a) > 0 : !is_undef(a);
 
 
 // Function: _first()
+// Synopsis: Return the first "defined" value in a list
 // Description:
 //   Given a list of values, returns the first defined (as per `_defined()`) in the list.
 //   Because we're using `_defined()` to test each value in the list, 
@@ -1285,6 +1407,7 @@ function _first(list) = [for (i = list) if (_defined(i)) i][0];
 
 
 // Function: _defined_len()
+// Synopsis: Return the number of defined elements in a list
 // Description:
 //   Given a list of values, returns the number of defined elements in that 
 //   list. If there are no elements, or if all elements are undefined, returns `0`.
