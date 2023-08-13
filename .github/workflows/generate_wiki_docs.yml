@@ -1,11 +1,10 @@
-name: Regen Docs
+name: Generate Wiki Docs
 
 on:
   workflow_run:
     workflows: [Unit tests]
     types: [completed]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -13,21 +12,26 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: CloneWiki
+      - name: Clone Wiki
         uses: actions/checkout@v3
         with:
           repository: jon-gilbert/openscad_objects.wiki
           path: openscad_objects.wiki
 
+      - name: Clone BOSL2
+        uses: actions/checkout@v3
+        with:
+            repository: BelfrySCAD/BOSL2
+            path: ${{ github.workspace }}/..
+
       - name: APT update
         run: sudo apt update
 
       - name: Install Required Libraries
-        run: sudo apt-get install python3-pip python3-dev python3-setuptools python3-pil gifsicle libfuse2 git
+        run: sudo apt-get install python3-pip python3-dev python3-setuptools python3-pil gifsicle libfuse2
 
       - name: Install openscad-docsgen
         run: sudo pip3 install openscad-docsgen
@@ -39,8 +43,8 @@ jobs:
           sudo mv OpenSCAD-2021.01*-x86_64.AppImage /usr/local/bin/openscad
           sudo chmod +x /usr/local/bin/openscad
 
-      - name: Install BOSL2
-        run: git clone https://github.com/BelfrySCAD/BOSL2.git
+#      - name: Install BOSL2
+#        run: git clone https://github.com/BelfrySCAD/BOSL2.git
 
       - name: Generate Wiki docs
         uses: GabrielBB/xvfb-action@v1.6
