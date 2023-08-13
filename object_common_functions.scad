@@ -22,7 +22,7 @@ include <BOSL2/std.scad>
 //   .
 //   Objects have two basic parts: a list of attributes, their types, and default 
 //   values; and, a list attributes with their set values. The functions in this 
-//   section address the overall Object's creation and validity. 
+//   section deal with the overall Object's creation and validity. 
 //
 // Function: Object()
 // Synopsis: Create a generic Object
