@@ -50,9 +50,12 @@ jobs:
         with:
           run: openscad-docsgen -f
 
-      - name: Upload docs to wiki
-        uses: SwiftDocOrg/github-wiki-publish-action@v1
-        with:
-          path: "openscad_objects.wiki"
-        env:
-          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+      - name: manual git upload to wiki
+        run: |
+          cd openscad_objects.wiki
+          git config user.name `git log -1 --pretty=format:"%an" "HEAD"`
+          git config user.email `git log -1 --pretty=format:"%ae" "HEAD"`
+          git add -A 
+          git commit -m "Wiki doc update"
+          git push
+
