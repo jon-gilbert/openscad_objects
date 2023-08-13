@@ -1,6 +1,6 @@
-DocsDirectory: docs/
+DocsDirectory: openscad_objects.wiki
 TargetProfile: githubwiki
-ProjectName: openscad_objects
+ProjectName: OpenSCAD Objects: reusable object-oriented functions
 IgnoreFiles:
   tmp_*.scad
 DefineHeader(BulletList): Todo
