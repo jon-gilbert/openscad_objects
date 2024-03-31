@@ -630,6 +630,7 @@ function obj_get_values(obj) = slice(obj, 1);
 
 
 // Function: obj_get_values_by_attrs()
+// Synopsis: Get a list of values from the Object in arbitrary order
 // Description:
 //   Given an object `obj` and a list of attribute names `names`, return the values for those 
 //   attributes as a list `values`. Values are returned in the order in which they are 
