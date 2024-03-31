@@ -629,6 +629,60 @@ function _attr_type_default_from_string_recast(type, value_as_string) =
 function obj_get_values(obj) = slice(obj, 1);
 
 
+// Function: obj_get_values_by_attrs()
+// Description:
+//   Given an object `obj` and a list of attribute names `names`, return the values for those 
+//   attributes as a list `values`. Values are returned in the order in which they are 
+//   specified in `names`. 
+//   If the attributes have no value set, and there is a list of optional defaults `defaults`, 
+//   returns the value at the same position as the attribute appears in `names`. 
+// Usage:
+//   values = obj_get_values_by_attrs(obj, names);
+// Arguments:
+//   obj = An Object list. No default. 
+//   names = A list of attribute names. No default.
+//   ---
+//   defaults = A list of default values that positionally map to the attributes in `names`. No default.
+// Continues:
+//   It is not an error to specify an attribute name multiple times. A `defaults` list that 
+//   isn't as long as a `names` list will be padded to be the same length with `undef` elements; however, a 
+//   `defaults` list that is *longer* than a `names` list will have its extraneous elements 
+//   ignored.
+//   .
+//   There is no type comparison for the `defaults` list given to `obj_get_values_by_attrs()`
+//   against the attributes in `obj`.
+// Example(NORENDER):
+//   Axle_attributes = ["diameter=i", "length=i"];
+//   function Axle(vlist=[], mutate=[]) = Object("Axle", Axle_attributes, vlist, mutate);
+//   axle = Axle([["diameter", 5], ["length", 10]]);
+//   values = obj_get_values_by_attrs(axle, ["length", "diameter"]);
+//   // values == [10, 5]
+// Example(NORENDER): only one attribute is specified in `names`, and only one value is returned in `values`:
+//   Axle_attributes = ["diameter=i", "length=i"];
+//   function Axle(vlist=[], mutate=[]) = Object("Axle", Axle_attributes, vlist, mutate);
+//   axle = Axle([["diameter", 5], ["length", 10]]);
+//   values = obj_get_values_by_attrs(axle, ["length"]);
+//   // values == [10]
+// Example(NORENDER): with no values set in the object, no value is returned for the attributes:
+//   Axle_attributes = ["diameter=i=5", "length=i=20"];
+//   function Axle(vlist=[], mutate=[]) = Object("Axle", Axle_attributes, vlist, mutate);
+//   axle = Axle();
+//   values = obj_get_values_by_attrs(axle, ["length", "diameter"]);
+//   // values == [undef, undef]
+// Example(NORENDER): with no value set in the object for "length", the value from `defaults` is returned instead:
+//   Axle_attributes = ["diameter=i=5", "length=i=20"];
+//   function Axle(vlist=[], mutate=[]) = Object("Axle", Axle_attributes, vlist, mutate);
+//   axle = Axle(["diameter", 3);
+//   values = obj_get_values_by_attrs(axle, ["length", "diameter"], defaults=[12, 12]);
+//   // values == [12, 3]
+function obj_get_values_by_attrs(obj, names, defaults=[]) =
+    let(
+        _defaults = list_pad(defaults, len(names), undef)
+    )
+    [ for (i=idx(names)) obj_accessor_get(obj, names[i], default=_defaults[i]) ];
+
+
+
 // Function: obj_has_value()
 // Description:
 //   Given an object, return `true` if any one of its attributes are defined. If no attributes 
