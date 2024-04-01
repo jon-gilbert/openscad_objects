@@ -13,7 +13,7 @@ This library was made to address a set number of issues within OpenSCAD:
 See [HOWTO](HOWTO) for a quick, high-level guide on implementing Objects into your OpenSCAD module
 
 ## Reference Documentation
-All of the object functions are documented within [object_common_functions.scad](object_common_functions.scad), with indexing at [AlphaIndex](AlphaIndex) & [TOC](TOC).
+All of the object functions are documented within [object_common_functions.scad](https://github.com/jon-gilbert/openscad_objects/wiki/object_common_functions.scad), with indexing at [AlphaIndex](AlphaIndex) & [TOC](TOC).
 
 ## Caveats
 As limitations are documented, you'll find them under [Caveats & Limitations](Caveats-&-Limitations).
