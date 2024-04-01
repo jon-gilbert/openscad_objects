@@ -154,6 +154,17 @@ module test_construction() {
 test_construction();
 
 
+module test_mutate() {
+    o = Object("O", ["a1=i", "a2=i"], ["a1", 10, "a2", 12]);
+    o2 = Object("O", [], vlist=["a2", 13], mutate=o);
+
+    assert(obj_toc(o) == obj_toc(o2));
+
+    assert(obj_accessor_get(o2, "a2") == 13);
+}
+test_mutate();
+
+
 module test_obj_accessor() {
     function D(vlist=[], mutate=[]) = Object( "D", 
         ["string=s", "integer=i", "boolean=b", "list=l", "undefined=u", "object=o"],

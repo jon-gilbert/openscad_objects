@@ -1110,10 +1110,13 @@ function obj_toc_build(name, attrs, mutate) =
     assert(_defined(attrs) || _defined(mutate), 
         "obj_toc_build: at least one of either attrs or mutate must be provided")
     let(
-        toc_attrs_with_type = [ for ( i=[0:len(attrs) - 1] ) attr_type_default_from_string_or_pairs(attrs[i]) ],
-        new_toc = list_insert(toc_attrs_with_type, [0], [name])
+        toc_attrs_with_type = (len(attrs) > 0)
+            ? [ for ( i=[0:len(attrs) - 1] ) attr_type_default_from_string_or_pairs(attrs[i]) ]
+            : []
     )
-    (obj_is_obj(mutate)) ? obj_toc(mutate) : new_toc;
+    (obj_is_obj(mutate)) 
+        ? obj_toc(mutate)
+        : list_insert(toc_attrs_with_type, [0], [name]);
 
 
 /// Function: obj_toc()
