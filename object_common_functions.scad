@@ -1533,75 +1533,76 @@ function _attr_type_default_from_string_recast(type, value_as_string) =
 
 
 
-// ------------------------------------------------------------------------------------------------------------
-// Section: Support Functions
-//   These are pulled directly from the 507 Project. To keep warnings down, 
-//   they're prefixed with an underscore (`_`), but otherwise are direct copies. 
-//   . 
-//   The remainder of the functions that this LibFile relies on are present in 
-//   BOSL2, all from the set of functions that make managing lists in OpenSCAD easier. They are:
-//   `flatten()`, `in_list()`, `list_insert()`, `list_pad()`, `list_set()`, `list_shape()`, and `list_to_matrix()`.
-//
-// Function: _defined()
-// Synopsis: Good all-purpose "is this variable defined?" function
-// Usage:
-//   _defined(value);
-// Description:
-//   Given a variable, return true if the variable is defined. 
-//   This doesn't differenate `true` vs `false` - `false` is still defined. 
-//   `_defined()` tests to see if a string value is something other than `undef`, 
-//   or a list value is something other than `[]` (an empty list). 
-//   *Mnem: this tests if the var has a value.*
-// Arguments:
-//   value = The thing to test definition.
-// Example(NORENDER):
-//   _defined(undef);  // Returns: false
-//   _defined(1);      // Returns: true
-//   _defined(0);      // Returns: true
-//   _defined(-1);     // Returns: true
-//   _defined("a");    // Returns: true 
-//   _defined([]);     // Returns: false
-//   _defined(true);   // Returns: true
-//   _defined(false);  // Returns: true
+/// ------------------------------------------------------------------------------------------------------------
+/// Section: Support Functions
+///   These are pulled directly from the 507 Project. To keep warnings down, 
+///   they're prefixed with an underscore (`_`), but otherwise are direct copies. 
+///   . 
+///   The remainder of the functions that this LibFile relies on are present in 
+///   BOSL2, all from the set of functions that make managing lists in OpenSCAD easier. They are:
+///   `flatten()`, `in_list()`, `list_insert()`, `list_pad()`, `list_set()`, `list_shape()`, and `list_to_matrix()`.
+///
+/// Function: _defined()
+/// Synopsis: Good all-purpose "is this variable defined?" function
+/// Usage:
+///   _defined(value);
+/// Description:
+///   Given a variable, return true if the variable is defined. 
+///   This doesn't differenate `true` vs `false` - `false` is still defined. 
+///   `_defined()` tests to see if a string value is something other than `undef`, 
+///   or a list value is something other than `[]` (an empty list). 
+///   *Mnem: this tests if the var has a value.*
+/// Arguments:
+///   value = The thing to test definition.
+/// Example(NORENDER):
+///   _defined(undef);  // Returns: false
+///   _defined(1);      // Returns: true
+///   _defined(0);      // Returns: true
+///   _defined(-1);     // Returns: true
+///   _defined("a");    // Returns: true 
+///   _defined([]);     // Returns: false
+///   _defined(true);   // Returns: true
+///   _defined(false);  // Returns: true
 function _defined(a) = (is_list(a)) ? len(a) > 0 : !is_undef(a);
 
 
-// Function: _first()
-// Synopsis: Return the first "defined" value in a list
-// Usage:
-//   _first(list);
-// Description:
-//   Given a list of values, returns the first defined (as per `_defined()`) in the list.
-//   Because we're using `_defined()` to test each value in the list, 
-//   `false` is a valid candidate for return. 
-//   .
-//   If there's no suitable element that can be returned, `_first()` returns undef.  
-// Arguments:
-//   list = The list from which to examine for the first defined item. `list` can be comprised of any variable type that is testable by `_defined()`. 
-// Example(NORENDER):
-//   _first([undef, "a"]);       // Returns: "a"
-//   _first([0, 1]);             // Returns: 0         (because 0 is defined)
-//   _first([false, 1]);         // Returns: false     (because false is defined)
-//   _first([[]], "a"]);         // Returns: "a"       (because an empty list is undefined)
-//   _first([undef, [[]]);       // Returns: undef     (because there is no valid, defined element)
-// See Also: _defined()
+/// Function: _first()
+/// Synopsis: Return the first "defined" value in a list
+/// Usage:
+///   _first(list);
+/// Description:
+///   Given a list of values, returns the first defined (as per `_defined()`) in the list.
+///   Because we're using `_defined()` to test each value in the list, 
+///   `false` is a valid candidate for return. 
+///   .
+///   If there's no suitable element that can be returned, `_first()` returns undef.  
+/// Arguments:
+///   list = The list from which to examine for the first defined item. `list` can be comprised of any variable type that is testable by `_defined()`. 
+/// Example(NORENDER):
+///   _first([undef, "a"]);       // Returns: "a"
+///   _first([0, 1]);             // Returns: 0         (because 0 is defined)
+///   _first([false, 1]);         // Returns: false     (because false is defined)
+///   _first([[]], "a"]);         // Returns: "a"       (because an empty list is undefined)
+///   _first([undef, [[]]);       // Returns: undef     (because there is no valid, defined element)
+/// See Also: _defined()
 function _first(list) = [for (i = list) if (_defined(i)) i][0];
 
 
-// Function: _defined_len()
-// Synopsis: Return the number of defined elements in a list
-// Usage:
-//   _defined_len(list);
-// Description:
-//   Given a list of values, returns the number of defined elements in that 
-//   list. If there are no elements, or if all elements are undefined, returns `0`.
-// Arguments:
-//   list = A list of items to count. `list` can be comprised of any variable type that is testable by `_defined()`. 
-// Example(NORENDER):
-//   _defined_len([0, 1, 2]);         // Returns: 3
-//   _defined_len([undef, 1, 2]);     // Returns: 2
-// See Also: _defined()
+/// Function: _defined_len()
+/// Synopsis: Return the number of defined elements in a list
+/// Usage:
+///   _defined_len(list);
+/// Description:
+///   Given a list of values, returns the number of defined elements in that 
+///   list. If there are no elements, or if all elements are undefined, returns `0`.
+/// Arguments:
+///   list = A list of items to count. `list` can be comprised of any variable type that is testable by `_defined()`. 
+/// Example(NORENDER):
+///   _defined_len([0, 1, 2]);         // Returns: 3
+///   _defined_len([undef, 1, 2]);     // Returns: 2
+/// See Also: _defined()
 function _defined_len(list) = len([ for (i=list) if (_defined(i)) i]);
+
 
 function _assert_assign_if_defined(a, b, msg) = (_defined(a)) 
     ? assert( (b) ? b : a, msg ) a
