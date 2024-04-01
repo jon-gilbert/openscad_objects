@@ -45,22 +45,35 @@ module test_test_type_obj() {
 test_test_type_obj();
 
 
-module test_obj_data_types() {
+module test_data_type_is_valid() {
     assert( len(ATTRIBUTE_DATA_TYPES) > 0 );
 
-    assert( obj_type_is_valid("s") );
-    assert( obj_type_is_valid("i") );
-    assert( obj_type_is_valid("b") );
-    assert( obj_type_is_valid("l") );
-    assert( obj_type_is_valid("u") );
-    assert( obj_type_is_valid("o") );
+    assert( data_type_is_valid("s") );
+    assert( data_type_is_valid("i") );
+    assert( data_type_is_valid("b") );
+    assert( data_type_is_valid("l") );
+    assert( data_type_is_valid("u") );
+    assert( data_type_is_valid("o") );
 }
-test_obj_data_types();
+test_data_type_is_valid();
+
+
+module test_obj_data_type_is_valid() {
+    obj = gen_test_type_object();
+    assert( obj_data_type_is_valid(obj, "string") );
+    assert( obj_data_type_is_valid(obj, "integer") );
+    assert( obj_data_type_is_valid(obj, "boolean") );
+    assert( obj_data_type_is_valid(obj, "list") );
+    assert( obj_data_type_is_valid(obj, "undefined") );
+    assert( obj_data_type_is_valid(obj, "object") );
+}
+test_obj_data_type_is_valid();
 
 
 module test_obj_type_check_value() {
     obj = gen_test_type_object();
 
+    assert( obj_type_check_value(obj, "string") );
     assert( obj_type_check_value(obj, "string", "abcd") );
     assert( obj_type_check_value(obj, "string", "    ") );
     assert( obj_type_check_value(obj, "string", "	") );   // a literal tab
@@ -70,6 +83,7 @@ module test_obj_type_check_value() {
     assert( obj_type_check_value(obj, "string", "0") );
     assert( obj_type_check_value(obj, "string", "undef") );
 
+    assert( obj_type_check_value(obj, "integer") );
     assert( obj_type_check_value(obj, "integer", 1) );
     assert( obj_type_check_value(obj, "integer", 0) );
     assert( obj_type_check_value(obj, "integer", -1) );
@@ -78,16 +92,20 @@ module test_obj_type_check_value() {
     assert( obj_type_check_value(obj, "integer", 65535) );
     assert( obj_type_check_value(obj, "integer", -65535) );
 
+    assert( obj_type_check_value(obj, "boolean") );
     assert( obj_type_check_value(obj, "boolean", true) );
     assert( obj_type_check_value(obj, "boolean", false) );
 
+    assert( obj_type_check_value(obj, "list") );
     assert( obj_type_check_value(obj, "list", []) );
     assert( obj_type_check_value(obj, "list", [1, 2]) );
     assert( obj_type_check_value(obj, "list", [1, [4]]) );
 
+    assert( obj_type_check_value(obj, "undefined") );
     assert( obj_type_check_value(obj, "undefined", undef) );
 
     // TODO: when we've got workings to compare object types, augment here.
+    assert( obj_type_check_value(obj, "object") );
     assert( obj_type_check_value(obj, "object", obj) );
 }
 test_obj_type_check_value();

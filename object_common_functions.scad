@@ -962,41 +962,77 @@ ATTRIBUTE_DATA_TYPES = [
     ];
 
 
-// Function: obj_type_is_valid()
-// Synopsis: Test to see if a given data type is valid
-// Description:
-//   Given a type, returns `true` if the type is found within ATTRIBUTE_DATA_TYPES, or false otherwise. 
+// Function: obj_data_type_is_valid()
+// Synopsis: Test to see if the attribute of a given Object data type is valid
 // Usage:
-//   obj_type_is_valid(type);
-// Arguments:
-//   type = the type of data to check. No default. 
-function obj_type_is_valid(type) = in_list(type, ATTRIBUTE_DATA_TYPES);
-
-
-// Function: obj_type_check_value()
-// Synopsis: Test if a specified attribute matches its data type
+//   bool = obj_data_type_is_valid(obj, name);
 // Description:
-//   Given a valid object, an attribute `name`, and a `value`, check to see if the 
-//   value is the same data type as the attribute's type for that Object. If the 
-//   provided value matches, `obj_type_check_value()` returns true. 
-//   Returns false otherwise. 
-// Usage:
-//   obj_type_check_value(obj, name, value);
+//   Given an Object `obj` and the name of an attribute within that Object `name`, 
+//   return `true` if the defined data type for that attribute is valid, or 
+//   `false` otherwise. 
 // Arguments:
 //   obj = An Object list. No default. 
 //   name = An attribute name that exists within `obj`. No default.
-//   value = A value to compare against `name`'s data type. No default. 
+function obj_data_type_is_valid(obj, name) = data_type_is_valid(obj_toc_get_attr_type_by_name(obj, name));
+
+
+// Function: data_type_is_valid()
+// Synopsis: Test to see if a given data type is valid
+// Usage:
+//   data_type_is_valid(type);
+// Description:
+//   Given a type, returns `true` if the type is found within ATTRIBUTE_DATA_TYPES, or false otherwise. 
+// Arguments:
+//   type = the type of data to check. No default. 
+function data_type_is_valid(type) = in_list(type, ATTRIBUTE_DATA_TYPES);
+
+
+// Function: obj_type_check_value()
+// Synopsis: Test if a specified Object attribute matches its data type
+// Usage:
+//   bool = obj_type_check_value(obj, name);
+//   bool = obj_type_check_value(obj, name, <value=value>);
+// Description:
+//   Given a valid Object `obj` and the name of an attribute that exists in that Object `name`, 
+//   return `true` if the value stored in the Object's attribute matches the data type 
+//   set for that attribute, or `false` otherwise. 
+//   .
+//   A specific data value `value` may be optionally provided, and `obj_test_check_value()` 
+//   will check that value against the attribute's data type, rather than whatever 
+//   is in the Object. 
+// Arguments:
+//   obj = An Object list. No default. 
+//   name = An attribute name that exists within `obj`. No default.
+//   ---
+//   value = A value to compare against `name`'s data type. Default: `undef` (meaning the Object's attribute value will be checked)
+// See Also: test_value_type()
 // Todo: 
 //   figure out if we care about enforcing object types (eg, `["attr-name", "o:Axle"]`)
-function obj_type_check_value(obj, name, value) = 
+//   re-implement a proper range type
+function obj_type_check_value(obj, name, value=undef) = 
     let(
-        type_id = obj_toc_get_attr_type_by_name(obj, name)
-    ) _type_check_value(type_id, value);
+        type_id = obj_toc_get_attr_type_by_name(obj, name),
+        value_ = _first([value, obj_accessor_get(obj, name)])
+    ) test_value_type(type_id, value_);
 
 
-function _type_check_value(type_id, value) = 
-    assert(obj_type_is_valid(type_id), 
-        str("_type_check_value(): Unknown type_id: ", type_id))
+// Function: test_value_type()
+// Synopsis: Test if a data value matches its data type
+// Usage:
+//   bool = test_value_type(type_id, value);
+// Description:
+//   Given a valid data type `type_id` and a data value `value`, 
+//   return `true` if the value matches the data type, or false otherwise.
+// Arguments:
+//   type_id = A valid data type ID. No default.
+//   value = A data value. No default.
+// Continues:
+//   It is an error to specify a data type ID that does not exist within 
+//   ATTRIBUTE_DATA_TYPES.
+// See Also: ATTRIBUTE_DATA_TYPES
+function test_value_type(type_id, value) = 
+    assert(data_type_is_valid(type_id), 
+        str("test_value_type(): Unknown type_id: ", type_id))
     (type_id == "o")
         ? is_list(value)
         : (type_id == "i")
@@ -1400,7 +1436,7 @@ function attr_type_default_from_string_or_pairs(tuple) =
 
         attr_name = elems[0],
 
-        attr_type = (_defined(elems[1]) && obj_type_is_valid(elems[1]))
+        attr_type = (_defined(elems[1]) && data_type_is_valid(elems[1]))
             ? elems[1] 
             : undef,
 
@@ -1413,7 +1449,7 @@ function attr_type_default_from_string_or_pairs(tuple) =
 
         attr_default = (attr_type == "u")
             ? undef 
-            : (_defined(attr_type) && _defined(_attr_default) && _type_check_value(attr_type, _attr_default))
+            : (_defined(attr_type) && _defined(_attr_default) && test_value_type(attr_type, _attr_default))
                 ? _attr_default
                 : (attr_type == "l" && !_defined(_attr_default))
                     ? []  // Special case for using empty lists as a default
@@ -1427,7 +1463,7 @@ function attr_type_default_from_string_or_pairs(tuple) =
 
 function _attr_type_default_from_string_recast(type, value_as_string) = 
     let(
-        v = (_type_check_value(type, value_as_string)) 
+        v = (test_value_type(type, value_as_string)) 
             ? value_as_string
             : (type == "b")
                 ? (value_as_string == "true")
