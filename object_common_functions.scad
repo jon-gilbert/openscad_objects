@@ -445,30 +445,22 @@ function obj_get_values(obj) = slice(obj, 1);
 //   .
 //   There is no type comparison for the `defaults` list given to `obj_get_values_by_attrs()`
 //   against the attributes in `obj`.
-// Example(NORENDER):
-//   Axle_attributes = ["diameter=i", "length=i"];
-//   function Axle(vlist=[], mutate=[]) = Object("Axle", Axle_attributes, vlist, mutate);
-//   axle = Axle([["diameter", 5], ["length", 10]]);
-//   values = obj_get_values_by_attrs(axle, ["length", "diameter"]);
+// Example(NORENDER): calling `obj_get_values_by_attrs()`. Note the order of the `names` differs from the Object's order:
+//   obj = Object("ExampleObj", ["attr1=i", "attr2=i"], ["attr1", 5, "attr2", 10]);
+//   values = obj_get_values_by_attrs(obj, ["attr2", "attr1"]);
 //   // values == [10, 5]
 // Example(NORENDER): only one attribute is specified in `names`, and only one value is returned in `values`:
-//   Axle_attributes = ["diameter=i", "length=i"];
-//   function Axle(vlist=[], mutate=[]) = Object("Axle", Axle_attributes, vlist, mutate);
-//   axle = Axle([["diameter", 5], ["length", 10]]);
-//   values = obj_get_values_by_attrs(axle, ["length"]);
+//   obj = Object("ExampleObj", ["attr1=i", "attr2=i"], ["attr1", 5, "attr2", 10]);
+//   values = obj_get_values_by_attrs(obj, ["attr2"]);
 //   // values == [10]
-// Example(NORENDER): with no values set in the object, no value is returned for the attributes:
-//   Axle_attributes = ["diameter=i=5", "length=i=20"];
-//   function Axle(vlist=[], mutate=[]) = Object("Axle", Axle_attributes, vlist, mutate);
-//   axle = Axle();
-//   values = obj_get_values_by_attrs(axle, ["length", "diameter"]);
+// Example(NORENDER): with no values set in the object, `undef` is returned for the attributes:
+//   obj = Object("ExampleObj", ["attr1=i", "attr2=i"]);
+//   values = obj_get_values_by_attrs(obj, ["attr1", "attr2"]);
 //   // values == [undef, undef]
-// Example(NORENDER): with no value set in the object for "length", the value from `defaults` is returned instead:
-//   Axle_attributes = ["diameter=i=5", "length=i=20"];
-//   function Axle(vlist=[], mutate=[]) = Object("Axle", Axle_attributes, vlist, mutate);
-//   axle = Axle(["diameter", 3);
-//   values = obj_get_values_by_attrs(axle, ["length", "diameter"], defaults=[12, 12]);
-//   // values == [12, 3]
+// Example(NORENDER): with no value set in the object for "attr2" and no attribute defaults set in the Object, the value from `defaults` is returned instead:
+//   obj = Object("ExampleObj", ["attr1=i, "attr2=i"], ["attr1", 3]);
+//   values = obj_get_values_by_attrs(obj, ["attr1", "attr2"], [4, 4]);
+//   // values == [3, 4]
 function obj_get_values_by_attrs(obj, names, defaults=[]) =
     let(
         _defaults = list_pad(defaults, len(names), undef)
