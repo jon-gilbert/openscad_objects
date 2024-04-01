@@ -869,22 +869,26 @@ function obj_get_defaults(obj) = obj_toc_get_attr_defaults(obj);
 //   default is available, return that instead. Works pretty much like every 
 //   other OO model out there, easy-peasy. 
 //   ```openscad
-//      axle = Object("Axle", [["diameter", "i"], ["length", "i"]], 
-//                            [["diameter", 10],  ["length", undef]]);
+//      axle = Object("Axle", 
+//                    [["diameter", "i"], ["length", "i"]], 
+//                    [["diameter", 10],  ["length", undef]]
+//                    );
 //      echo( obj_accessor_get(axle, "diameter") );
 //      // ECHO: 10
 //   ```
 //   .
 //   "Setting" an attribute's value is a little more interesting, because OpenSCAD 
 //   doesn't let you change a variable after it's been declared: in other languages, 
-//   the data for a class or object is mutatable and liable to change, but in 
+//   the data for a class or object may be altered and is liable to change, but in 
 //   OpenSCAD you can't do that. So: instead of returning the new value, or 
 //   a "you changed this value" success flag, setting an attribute's value returns 
 //   _an entirely new Object_. The new Object has the newly-set attribute value, 
 //   and the original Object is unmodified.
 //   ```openscad
-//      axle = Object("Axle", [["diameter", "i"], ["length", "i"]], 
-//                            [["diameter", 10],  ["length", undef]]);
+//      axle = Object("Axle", 
+//                    [["diameter", "i"], ["length", "i"]], 
+//                    [["diameter", 10],  ["length", undef]]
+//                    );
 //      echo( obj_accessor_get(axle, "length") );
 //      // ECHO: undef
 //      axle2 = obj_accessor_set(axle, "length", nv=30);
@@ -892,7 +896,7 @@ function obj_get_defaults(obj) = obj_toc_get_attr_defaults(obj);
 //      // ECHO: 30
 //   ```
 //   .
-//   There's one mutatable accessor, `obj_accessor()`, that 
+//   There's one mutable accessor, `obj_accessor()`, that 
 //   can both `get` and `set` values by attribute name. There are also 
 //   two get- and set-specific accessors: `obj_accessor_get()` returns attributes in a 
 //   read-only manner; and, `obj_accessor_set()` returns a modifed object list after 
@@ -912,7 +916,7 @@ function obj_get_defaults(obj) = obj_toc_get_attr_defaults(obj);
 //   Basic accessor for object attributes. Given an object `obj` and an attribute name `name`, operates on that attribute. 
 //   The operation depends on what other options are passed. Calls to `obj_accessor()` with an `nv` (new-value) option 
 //   defined will create a new object based on `obj` with the new value set for `name`, and then will return that 
-//   new object (a "set" operation). 
+//   modified object list as `new_object` (a "set" operation). 
 //   .
 //   Calls to `obj_accessor()` without the `nv` option will look the current value of `name` up in the object and 
 //   return it (a "get" operation). "Get" operations can provide a `default` option, for when values aren't set. 
@@ -938,35 +942,24 @@ function obj_get_defaults(obj) = obj_toc_get_attr_defaults(obj);
 //   clear an object's attribute, use `obj_accessor_unset()`. To explicitly set an attribute to a new value, use 
 //   `obj_accessor_set()` (which will error out if `nv` is not defined). 
 // Example(NORENDER): direct "get" call to `obj_accessor()`:
-//   axle = Axle(["length", 30]);
-//   length = obj_accessor(axle, "length");
-//   // length == 30
-//   diameter = obj_accessor(axle, "diameter", default=10);
-//   // diameter == 10
-//   // (diameter is unset in the `axle` object, so the default of 10 is returned instead)
+//   obj = Object("ExampleObj", ["a1=i", "a2=i"], ["a1", 30]);
+//   a1 = obj_accessor(obj, "a1");
+//   // a1 == 30
+//   a2 = obj_accessor(obj, "a2", default=10);
+//   // a2 == undef 
+//   // (because `a2` is not set in `obj`, and there is no Object default, there is no value to return.)
+//   a2_2 = obj_accessor(obj, "a2", default=10);
+//   // a2_2 == 10
+//   // (`a2` is still unset in the `obj` object, but `default` was provided to `obj_accessor()`, so that default of 10 is returned instead)
 // Example(NORENDER): direct "set" calls to `obj_accessor()`:
-//   axle = Axle(["length", 30]);
-//   new_axle = obj_accessor(axle, "length", nv=6);
-//   // new_axle's `length` value is now 6. 
-//   // axle's `length` value is still 30.
+//   obj = Object("ExampleObj", ["a1=i", "a2=i"], ["a1", 30]);
+//   obj2 = obj_accessor(obj, "a1", nv=6);
+//   // obj2 is a new object, of the same type as `obj`; its `a1` value is now 6. 
+//   // obj's `a1` value is still 30.
 // Example(NORENDER): gotcha when providing `undef` as a new-value:
-//   axle = Axle([["diameter", 10], ["length", 30]]);
-//   new_axle = obj_accessor(axle, "length", nv=undef);
-//   // new_axle == 6, because obj_accessor() didn't see a value for `nv`, and instead of changing "length", its value was returned
-// Example(NORENDER): providing a class-specific "glue" accessor:
-//   function axle_acc(axle, name, default=undef, nv=undef) = obj_accesor(axle, name, default, nv);
-//   // ..
-//   axle = Axle([["diameter", 10], ["length", 30]]);
-//   dia = axle_acc(axle, "diameter");
-//   // dia == 10
-// Example(NORENDER): providing a class- and attribute-specific "glue" accessor:
-//   function axle_diameter(axle, default=undef, nv=undef) = obj_accessor(axle, "diameter", default=default, nv=nv);
-//   // ...
-//   axle = Axle([["diameter", 10], ["length", 30]]);
-//   diameter = axle_diameter(axle);
-//   // diameter == 10
-//   new_axle = axle_diameter(axle, nv=9);
-//   // new_axle == [9, 30] 
+//   obj = Object("ExampleObj", ["a1=i", "a2=i"], ["a1", 10, "a2", 30]);
+//   obj2 = obj_accessor(obj, "a1", nv=undef);
+//   // obj2 == 10, because `obj_accessor()` didn't see a value for `nv`: instead of changing `a1`, the value of `a1` was returned.
 // Todo: 
 //   when getting an attribute without a value and a default is provided, do a type check on the default value before returning
 // EXTERNAL - 
@@ -1013,7 +1006,7 @@ function obj_accessor(obj, name, default=undef, nv=undef, _consider_toc_default_
 //   value = obj_accessor_get(obj, name, <default=undef>);
 // Description:
 //   Basic "get" accessor for Objects. Given an object `obj` and attribute name `name`, `obj_accessor_get()` will look the current 
-//   value of `name` up in the object and return it (a "get" operation). 
+//   value of `name` up in the object and return it as `value` (a "get" operation). 
 //   .
 //   `obj_accessor_get()` is a simplified wrap around `obj_accessor()`, and the mechanics on how values are returned 
 //   are the same. "Get" operations can provide a `default` option, for when values aren't set. 
@@ -1023,7 +1016,7 @@ function obj_accessor(obj, name, default=undef, nv=undef, _consider_toc_default_
 //   for the object, `undef` will be returned. 
 // Arguments:
 //   obj = An Object list. No default. 
-//   name = The attribute name to access. The name must be present in `obj`'s TOC.
+//   name = The attribute name to access. The name must be present in `obj`'s TOC. No default.
 //   ---
 //   default = If provided, and if there is no existing value for `name` in the object `obj`, returns the value of `default` instead. 
 //   _consider_toc_default_values = If enabled, TOC-stored defaults will be returned according to the mechanics above. If disabled with `false`, the TOC default for a given attribute will not be considered as a viable return value. Default: `true`
@@ -1031,16 +1024,13 @@ function obj_accessor(obj, name, default=undef, nv=undef, _consider_toc_default_
 //   Note that `obj_accessor_get()` will accept a `nv` option, to make writing accessor glue easier, but 
 //   that `nv` option won't be evaluated or used. 
 // Example(NORENDER): direct calls to `obj_accessor_get()`:
-//   length = obj_accessor_get(axle, "length");
+//   obj = Object("ExampleObj", ["a1=i", "a2=i"], ["a1", 30]);
+//   value = obj_accessor_get(obj, "a1");
+//   // value == 30
 // Example(NORENDER): passing `nv` yields no change:
-//   retr = obj_accessor_get(axle, "length", nv=25);
-//   // retr == 30 (or, whatever the Axle's `length` previously was; the `nv` option is ignored)
-// Example(NORENDER): providing a class- and attribute-specific "glue" read-only accessor:
-//   function get_axle_length(axle, default=undef) = obj_accesor_get(axle, "length", default=default);
-//   // ..
-//   axle = Axle([["diameter", 10], ["length", 30]]);
-//   length = get_axle_length(axle);
-//   // length == 30
+//   obj = Object("ExampleObj", ["a1=i", "a2=i"], ["a1", 30]);
+//   value = obj_accessor_get(obj, "a1", nv=25);
+//   // value == 30  (the `nv` option is ignored)
 function obj_accessor_get(obj, name, nv=undef, default=undef, _consider_toc_default_values=true) = 
     let(
         _ = (_defined(nv))
@@ -1056,24 +1046,25 @@ function obj_accessor_get(obj, name, nv=undef, default=undef, _consider_toc_defa
 // Function: obj_accessor_set()
 // Synopsis: Generic write-only attribute accessor
 // Usage:
-//   new_obj = obj_accessor_set(obj, name, nv);
+//   new_object = obj_accessor_set(obj, name, nv);
 // Description:
 //   Basic "set" accessor for Objects. Given an object `obj`, an attribute name `name`, and a new value `nv` for that 
-//   attribute, `obj_accessor_set()` will return a new Object list with the updated value for that attribute. 
+//   attribute, `obj_accessor_set()` will return a new Object list with the updated value for that attribute as `new_object`.
 //   **The existing Object list is unmodified,** and a wholly new Object with the new value is returned instead. 
-//   .
-//   It is an error to call `obj_accessor_set()` without a new value (`nv`) passed. If the value of the attribute `name` 
-//   needs to be removed, use `obj_accessor_unset()` instead. 
 // Arguments:
 //   obj = An Object list. No default. 
-//   name = The attribute name to access. The name must be present in `obj`'s TOC.
-//   nv = If provided, `obj_accessor_set()` will update the value of the `name` attribute and return a new Object list. *The existing Object list is unmodified.*
+//   name = The attribute name to access. The name must be present in `obj`'s TOC. No default.
+//   nv = The new value to set as the new attribute. No default.
 // Continues:
+//   Unlike `obj_accessor()`, it is an error to call `obj_accessor_set()` without a new value (`nv`) passed. 
+//   If the value of the attribute `name` needs to be removed, use `obj_accessor_unset()` instead. 
+//   .
 //   Note that `obj_accessor_set()` will accept a `default` option, to make writing accessor 
-//   glue easier, but it won't be evaluated or used. 
+//   glue easier, but it will be neither evaluated nor used. 
 // Example(NORENDER): direct call to `obj_accessor_set()`
-//   new_axle = obj_accessor_set(axle, "length", nv=20);
-//   // new_axle's `length` attribute is now 20
+//   obj = Object("ExampleObj", ["a1=i", "a2=i"], ["a1", 30]);
+//   new_obj = obj_accessor_set(obj, "a1", nv=20);
+//   // new_obj's `a1` attribute is now 20
 // Example(NORENDER): providing a class- and attribute-specific "glue" write-only accessor:
 //   function set_axle_length(axle, nv) = obj_accessor_set(axle, "length", nv);
 //   // ..
@@ -1109,16 +1100,19 @@ function obj_accessor_set(obj, name, nv, default=undef) =
 // Usage:
 //   new_obj = obj_accessor_unset(obj, name);
 // Description:
-//   Basic "delete" accessor for Objects. A new Object will be returned 
+//   Basic "delete" accessor for Objects. Given an Object `obj` and an attribute 
+//   name `name`, a new Object will be returned 
 //   with the un-set attribute value. **The existing Object list is unmodified,** and a 
 //   wholly new Object list with the unset value is returned instead. 
 // Arguments:
 //   obj = An Object list. No default. 
-//   name = The attribute name to access. The name must be present in `obj`'s TOC.
+//   name = The attribute name to access. The name must be present in `obj`'s TOC. No default.
 // Example(NORENDER):
-//   axle = Axle([["diameter", 10], ["length", 30]]);
-//   new_axle = obj_accessor_unset(axle, "length");
-//   // new_axle == [["Axle", "diameter", "length"], 10, undef];
+//   obj = Object("ExampleObj", ["a1=i", "a2=i"], ["a1", 30]);
+//   new_obj = obj_accessor_unset(obj, "a1");
+//   // new_obj's `a1` attribute is now unset
+//   echo(obj_accessor_get(new_obj, "a1"));
+//   // emits: ECHO: undef
 // EXTERNAL - 
 //   list_set() (BOSL2);
 function obj_accessor_unset(obj, name) = 
