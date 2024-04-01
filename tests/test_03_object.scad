@@ -12,9 +12,9 @@ function gen_test_type_object() =
     obj_accessor_set(_obj, "object", nv=_obj);
 
 
-module test_obj_build_toc() {
+module test_obj_toc_build() {
     // test string-based paired creation
-    toc = obj_build_toc("Test", ["one=i", "two=s"], []);
+    toc = obj_toc_build("Test", ["one=i", "two=s"], []);
     assert( obj_is_obj( [toc, undef, undef] ));
 
     assert( obj_toc_get_type([toc, undef, undef]) == "Test" );
@@ -22,18 +22,18 @@ module test_obj_build_toc() {
     assert( obj_toc_get_attr_names([toc, undef, undef]) == ["_toc_", "one", "two"] );
 
     // test mutate TOC propgation
-    mtoc = obj_build_toc("Test", ["three=i", "four=s"], [toc, undef, undef] );
+    mtoc = obj_toc_build("Test", ["three=i", "four=s"], [toc, undef, undef] );
     assert( obj_toc_get_type([mtoc, undef, undef]) == "Test" );
     assert( obj_toc_attr_len([mtoc, undef, undef]) == 2 );
     assert( obj_toc_get_attr_names([mtoc, undef, undef]) == ["_toc_", "one", "two"], toc);
 
     // test list-based paired TOC creation
-    ptoc = obj_build_toc("TestP", [["five", "i"], ["six", "s"]], []);
+    ptoc = obj_toc_build("TestP", [["five", "i"], ["six", "s"]], []);
     assert( obj_toc_get_type([ptoc, undef, undef]) == "TestP" );
     assert( obj_toc_attr_len([ptoc, undef, undef]) == 2 );
     assert( obj_toc_get_attr_names([ptoc, undef, undef]) == ["_toc_", "five", "six"] );
 }
-test_obj_build_toc();
+test_obj_toc_build();
 
 
 module test_test_type_obj() {
@@ -45,22 +45,35 @@ module test_test_type_obj() {
 test_test_type_obj();
 
 
-module test_obj_data_types() {
+module test_data_type_is_valid() {
     assert( len(ATTRIBUTE_DATA_TYPES) > 0 );
 
-    assert( obj_type_is_valid("s") );
-    assert( obj_type_is_valid("i") );
-    assert( obj_type_is_valid("b") );
-    assert( obj_type_is_valid("l") );
-    assert( obj_type_is_valid("u") );
-    assert( obj_type_is_valid("o") );
+    assert( data_type_is_valid("s") );
+    assert( data_type_is_valid("i") );
+    assert( data_type_is_valid("b") );
+    assert( data_type_is_valid("l") );
+    assert( data_type_is_valid("u") );
+    assert( data_type_is_valid("o") );
 }
-test_obj_data_types();
+test_data_type_is_valid();
+
+
+module test_obj_data_type_is_valid() {
+    obj = gen_test_type_object();
+    assert( obj_data_type_is_valid(obj, "string") );
+    assert( obj_data_type_is_valid(obj, "integer") );
+    assert( obj_data_type_is_valid(obj, "boolean") );
+    assert( obj_data_type_is_valid(obj, "list") );
+    assert( obj_data_type_is_valid(obj, "undefined") );
+    assert( obj_data_type_is_valid(obj, "object") );
+}
+test_obj_data_type_is_valid();
 
 
 module test_obj_type_check_value() {
     obj = gen_test_type_object();
 
+    assert( obj_type_check_value(obj, "string") );
     assert( obj_type_check_value(obj, "string", "abcd") );
     assert( obj_type_check_value(obj, "string", "    ") );
     assert( obj_type_check_value(obj, "string", "	") );   // a literal tab
@@ -70,6 +83,7 @@ module test_obj_type_check_value() {
     assert( obj_type_check_value(obj, "string", "0") );
     assert( obj_type_check_value(obj, "string", "undef") );
 
+    assert( obj_type_check_value(obj, "integer") );
     assert( obj_type_check_value(obj, "integer", 1) );
     assert( obj_type_check_value(obj, "integer", 0) );
     assert( obj_type_check_value(obj, "integer", -1) );
@@ -78,16 +92,20 @@ module test_obj_type_check_value() {
     assert( obj_type_check_value(obj, "integer", 65535) );
     assert( obj_type_check_value(obj, "integer", -65535) );
 
+    assert( obj_type_check_value(obj, "boolean") );
     assert( obj_type_check_value(obj, "boolean", true) );
     assert( obj_type_check_value(obj, "boolean", false) );
 
+    assert( obj_type_check_value(obj, "list") );
     assert( obj_type_check_value(obj, "list", []) );
     assert( obj_type_check_value(obj, "list", [1, 2]) );
     assert( obj_type_check_value(obj, "list", [1, [4]]) );
 
+    assert( obj_type_check_value(obj, "undefined") );
     assert( obj_type_check_value(obj, "undefined", undef) );
 
     // TODO: when we've got workings to compare object types, augment here.
+    assert( obj_type_check_value(obj, "object") );
     assert( obj_type_check_value(obj, "object", obj) );
 }
 test_obj_type_check_value();
@@ -134,6 +152,17 @@ module test_construction() {
     assert( c4_obj == c6_obj );
 }
 test_construction();
+
+
+module test_mutate() {
+    o = Object("O", ["a1=i", "a2=i"], ["a1", 10, "a2", 12]);
+    o2 = Object("O", [], vlist=["a2", 13], mutate=o);
+
+    assert(obj_toc(o) == obj_toc(o2));
+
+    assert(obj_accessor_get(o2, "a2") == 13);
+}
+test_mutate();
 
 
 module test_obj_accessor() {
