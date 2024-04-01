@@ -93,28 +93,63 @@ include <BOSL2/std.scad>
 // Continues:
 //   `Object()` returns a list that should be treated as an opaque object: reading values directly 
 //   from the `object` list, or modifying them manually into a new list, is not entirely safe.
-// Example(NORENDER): empty object creation:
+// Example(NORENDER): empty object creation: this is an empty object that has no values assigned to its attributes:
 //   obj = Object("Obj", ["attr1=i", "attr2=s", "attr3=b=true"]);
 //   echo(obj);
 //   // emits: ECHO: [["Obj", ["attr1", "i", undef], ["attr2", "s", undef], ["attr3", "b", true]], undef, undef, undef]
-// Example(NORENDER): pre-populating object attributes at creation: 
+// Example(NORENDER): same empty object creation, but with the object shown with `obj_debug_obj()`. Note that while `attr3` has a default value set, all of the attributes are still undefined:
+//   obj = Object("Obj", ["attr1=i", "attr2=s", "attr3=b=true"]);
+//   echo(obj_debug_obj(obj));
+//   // emits: ECHO: "0: _toc_: Obj
+//   // 1: attr1 (i: undef): undef
+//   // 2: attr2 (s: undef): undef
+//   // 3: attr3 (b: true): undef"
+// Example(NORENDER): pre-populating object attributes at creation. Note the values set for `attr2` and `attr3`:
 //   o = Object("Obj", ["attr1=i", "attr2=s", "attr3=b=true"], [["attr2", "hello"], ["attr3", false]]);
-//   echo(o);
-//   // emits: ECHO: [["Obj", ["attr1", "i", undef], ["attr2", "s", undef], ["attr3", "b", true]], undef, "hello", false]
-// Example(NORENDER): pre-populating again, but with a simpler `vlist`:
+//   echo(obj_debug_obj(o));
+//   // emits: ECHO: "0: _toc_: Obj
+//   // 1: attr1 (i: undef): undef
+//   // 2: attr2 (s: undef): hello
+//   // 3: attr3 (b: true): false"
+// Example(NORENDER): pre-populating just as above, with the same attributes and values, but with a simpler `vlist`:
 //   o = Object("Obj", ["attr1=i", "attr2=s", "attr3=b=true"], ["attr2", "hello", "attr3", false]);
-//   echo(o);
-//   // emits: ECHO: [["Obj", ["attr1", "i", undef], ["attr2", "s", undef], ["attr3", "b", true]], undef, "hello", false]
-// Example(NORENDER): using `mutate` can carry values from a previous Object into a new one:
+//   echo(obj_debug_obj(o));
+//   // emits: ECHO: "0: _toc_: Obj
+//   // 1: attr1 (i: undef): undef
+//   // 2: attr2 (s: undef): hello
+//   // 3: attr3 (b: true): false"
+// Example(NORENDER): using `mutate` will carry values from a previous Object into a new one, with `vlist` values taking precedence:
 //   O_attrs = ["attr1=i", "attr2=s", "attr3=b=true"];
 //   o = Object("Obj", O_attrs, [["attr2", "hello"], ["attr3", false]]);
-//   echo(o);
+//   echo(obj_debug_obj(o));
 //   o2 = Object("Obj", O_attrs, vlist=["attr1", 12], mutate=o);
-//   echo(o2);
+//   echo(obj_debug_obj(o2));
 //   // emits:
-//   //   ECHO: [["Obj", ["attr1", "i", undef], ["attr2", "s", undef], ["attr3", "b", true]], undef, "hello", false]
-//   //   ECHO: [["Obj", ["attr1", "i", undef], ["attr2", "s", undef], ["attr3", "b", true]], 12, "hello", false]
-// See Also: ATTRIBUTE_DATA_TYPES
+//   // ECHO: "0: _toc_: Obj
+//   // 1: attr1 (i: undef): undef
+//   // 2: attr2 (s: undef): hello
+//   // 3: attr3 (b: true): false"
+//   // ECHO: "0: _toc_: Obj
+//   // 1: attr1 (i: undef): 12
+//   // 2: attr2 (s: undef): hello
+//   // 3: attr3 (b: true): false"
+// Example(NORENDER): when using `mutate`, you can specify an empty `attrs` list: the attributes will be carried over from the mutated Object:
+//   O_attrs = ["attr1=i", "attr2=s", "attr3=b=true"];
+//   o = Object("Obj", O_attrs, [["attr2", "hello"], ["attr3", false]]);
+//   echo(obj_debug_obj(o));
+//   o2 = Object("Obj", [], vlist=["attr1", 12], mutate=o);       // <-- an empty `attrs` list specified
+//   echo(obj_debug_obj(o2));
+//   // emits:
+//   // ECHO: "0: _toc_: Obj
+//   // 1: attr1 (i: undef): undef
+//   // 2: attr2 (s: undef): hello
+//   // 3: attr3 (b: true): false"
+//   // ECHO: "0: _toc_: Obj
+//   // 1: attr1 (i: undef): 12
+//   // 2: attr2 (s: undef): hello
+//   // 3: attr3 (b: true): false"
+//
+// See Also: obj_debug_obj(), ATTRIBUTE_DATA_TYPES
 // EXTERNAL - 
 //    is_list(), list_insert(), list_shape(), list_pad(), list_set() (BOSL2); 
 function Object(name, attrs=[], vlist=[], mutate=[]) =
