@@ -10,4 +10,5 @@ DefineHeader(BulletList): Links
 DefineHeader(Table;Headers=^Position|^Positional List Item|What It Represents): DefArgs
 DefineHeader(Table;Headers=^Position|^Name|What It Represents): Return Listing
 DefineHeader(Table;Headers=^Attribute Name|What It Represents): Attributes
+DefineHeader(Table;Headers=^Type ID|What It Represents): Type IDs
 DefineHeader(Table;Headers=^Function|What It Returns): Attribute Function Listing

@@ -944,7 +944,7 @@ function obj_list_debug_obj(obj_list) = [ for (obj=obj_list) obj_debug_obj(obj) 
 //   A list of known attribute data types. "Types" in this context are 
 //   single-character symbols that indicate what the attribute is 
 //   meant to hold. 
-// Attributes:
+// Type IDs: The following data type IDs are known:
 //   s = literal strings. Example: `"a string"`. *(Note: Strings are always assigned with quotes and we show that here, but as elsewhere in OpenSCAD the quotes are not part of the string.)* 
 //   i = integers. Example: `1`
 //   b = booleans. Example: `true`
