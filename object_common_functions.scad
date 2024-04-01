@@ -40,7 +40,6 @@ include <BOSL2/std.scad>
 // Synopsis: Create a generic Object
 // Usage:
 //   object = Object(name, attrs);
-//   object = Object(name, attrs, <vlist>);
 //   object = Object(name, attrs, <vlist=vlist>, <mutate=object>);
 // Description:
 //   Given an Object name as a string `name`, a list of attributes `attrs`, 
@@ -57,12 +56,24 @@ include <BOSL2/std.scad>
 //   `name[=data_type[=default]]`, where `name` is the name of the attribute; and, `data_type` is 
 //   one of the supported data types listed below in `ATTRIBUTE_DATA_TYPES`; and, `default` is 
 //   a default value for that attribute. 
-//   .
+//   ```openscad
+//   Object_Attributes = [
+//      "a1=s",            // defines "a1", a string attribute
+//      "a2=i=10"          // defines "a2", an integer attribute, with a default of 10
+//   ];
+//   ```
 //   When using the list form to define attributes, the attribute's defining format is a three-element list: 
 //   `[name, data_type, default]`. The three elements directly map to those in the string 
 //   format. Using a list format is required when the `default` is not easily represented in a 
 //   simple string (such as when the default is a list itself, or an object, or a pre-defined 
 //   constant such as `PI` or `CENTER`). 
+//   ```openscad
+//   Object_Attributes = [
+//      ["a1", "s"],             // defines "a1", a string attribute
+//      ["a2", "i", 10],         // defines "a2", an integer attribute, with a default of 10
+//      ["a3", "l", [1, 2, 3]],  // defines "a3", a list attribute, with a default list
+//   ];
+//   ```
 //   .
 //   **Pre-populating Objects with values with `vlist`:** 
 //   The `vlist` listing argument to `Object()` is a variable list of `[attribute, value]` lists. 
