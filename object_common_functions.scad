@@ -1130,7 +1130,7 @@ function obj_accessor_unset(obj, name) =
 //   list = obj_select(obj_list, idxs);
 // Description:
 //   Given a list of objects `obj_list` and a list of element indexes `idxs`, returns the
-//   objects in `obj_list` identified by their index position `idx`.
+//   objects in `obj_list` identified by their index position `idx` as a new list `list`.
 //   .
 //   The Objects need not be all of the same object type.
 // Arguments:
@@ -1151,13 +1151,13 @@ function obj_select(obj_list, idxs) =
 // Usage:
 //   list = obj_select_by_attr_defined(obj_list, attr);
 // Description:
-//   Given a list of Objects `obj_list` and an attribute name `attr`, return a list of
-//   all the Objects in `obj_list` that have the attribute `attr` defined.
+//   Given a list of Objects `obj_list` and an attribute name `attr`, return 
+//   all the Objects in `obj_list` that have the attribute `attr` defined as a list `list`.
 //   The Objects are returned in the order they appear in `obj_list`.
 //   The returned `list` of Objects may not be the same length as `obj_list`. The returned
 //   list `list` may have no elements in it.
 //   .
-//   The list of Objects need not be all of the same type.
+//   The list of Objects given need not be all of the same type.
 // Arguments:
 //   obj_list = A list of Objects
 //   attr = An attribute name
@@ -1174,7 +1174,7 @@ function obj_select_by_attr_defined(obj_list, attr) =
 //   list = obj_select_by_attr_value(obj_list, attr, value);
 // Description:
 //   Given an list of Objects `obj_list`, an attribute name `attr`, and a comparison value `value`, return
-//   a list of all Objects in `obj_list` whose value for `attr` matches `value`.
+//   all Objects in `obj_list` whose value for `attr` matches `value` as a list `list`.
 //   The Objects are returned in the order they appear in `obj_list`.
 //   .
 //   The Objects in `obj_list` need not be all of the same type.
