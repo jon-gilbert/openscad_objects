@@ -20,8 +20,21 @@ include <BOSL2/std.scad>
 //   These functions assist the creating and usage of object-like lists: "Objects".
 //   .
 //   Objects have two basic parts: a list of attributes, their types, and default 
-//   values; and, a list attributes with their set values. The functions in this 
-//   section deal with the overall Object's creation and validity. 
+//   values; and, a list of values for those attributes.
+//   ```openscad
+//   object = [
+//      TOC,
+//      value_1,
+//      value_N
+//      ];
+//   ```
+//   The list of attributes, their data types, and their default values are all stored in the 
+//   first element in the Object list: this is the table-of-contents (or "TOC"). The TOC is 
+//   itself a list, and each element in the TOC list is an attribute defintion. 
+//   After the TOC, each element in the Object list is the value of the attributes listed in the 
+//   definition. 
+//   .
+//   The functions in this section deal with creating the Object, and with its validity. 
 //
 // Function: Object()
 // Synopsis: Create a generic Object
@@ -90,6 +103,7 @@ include <BOSL2/std.scad>
 //   // emits:
 //   //   ECHO: [["Obj", ["attr1", "i", undef], ["attr2", "s", undef], ["attr3", "b", true]], undef, "hello", false]
 //   //   ECHO: [["Obj", ["attr1", "i", undef], ["attr2", "s", undef], ["attr3", "b", true]], 12, "hello", false]
+// See Also: ATTRIBUTE_DATA_TYPES
 // EXTERNAL - 
 //    is_list(), list_insert(), list_shape(), list_pad(), list_set() (BOSL2); 
 function Object(name, attrs=[], vlist=[], mutate=[]) =
@@ -607,6 +621,7 @@ function obj_accessor(obj, name, default=undef, nv=undef, _consider_toc_default_
 //   obj = Object("ExampleObj", ["a1=i", "a2=i"], ["a1", 30]);
 //   value = obj_accessor_get(obj, "a1", nv=25);
 //   // value == 30  (the `nv` option is ignored)
+// See Also: obj_accessor()
 function obj_accessor_get(obj, name, nv=undef, default=undef, _consider_toc_default_values=true) = 
     let(
         _ = (_defined(nv))
@@ -655,6 +670,7 @@ function obj_accessor_get(obj, name, nv=undef, default=undef, _consider_toc_defa
 //   // new_axle == 30  //<--- This is the `length` value, NOT a new object. 
 //   // Because the `nv` option wasn't provided, the call arrived into `obj_accessor()` as `undef`, and 
 //   // was treated as a "get". 
+// See Also: obj_accessor()
 function obj_accessor_set(obj, name, nv, default=undef) = 
     assert(_defined(name), str("obj_accessor_set(): attribute name must ",
         "be provided; called with: ", name))
@@ -871,7 +887,7 @@ function obj_regroup_list_by_attr(obj_list, attr) =
 // Arguments:
 //   obj_list = A list of Objects
 //   arglist = A list of `[attr, value]` lists, where: `attr` is an attribute name; and, `value` is a comparison value
-// See also: obj_select_by_attr_value()
+// See Also: obj_select_by_attr_value()
 function obj_select_by_attrs_values(obj_list, arglist) = _rec_obj_select_by_attrs_values(obj_list, arglist);
 
 function _rec_obj_select_by_attrs_values(obj_list, arglist, _id=0, _max=undef) =
@@ -929,7 +945,7 @@ function obj_list_debug_obj(obj_list) = [ for (obj=obj_list) obj_debug_obj(obj) 
 //   single-character symbols that indicate what the attribute is 
 //   meant to hold. 
 // Attributes:
-//   s = literal strings. Example: `"a string"`. *(Note: Strings are always assigned with quotes and we show that here, but the quotes are not part of the string.)* 
+//   s = literal strings. Example: `"a string"`. *(Note: Strings are always assigned with quotes and we show that here, but as elsewhere in OpenSCAD the quotes are not part of the string.)* 
 //   i = integers. Example: `1`
 //   b = booleans. Example: `true`
 //   l = lists. There is no restriction on list length or content. Example: `[1, 2, "abc"]`
@@ -996,53 +1012,53 @@ function _type_check_value(type_id, value) =
                             : false;
 
 
-// --------------------------------------------------------------------------------------------------------------------------------
-// Subsection: Object Table-of-Contents Functions
-//   These are functions specific to interacting with an Object's Table-of-Contents (TOC). 
-//   ```openscad
-//   object = [
-//      TOC,
-//      value_1,
-//      value_N
-//      ];
-//   ```
-//   The TOC is a list of attributes that belong to the object, the attribute's data types, 
-//   and their default values. The TOC is the first element in the Object: 
-//   it's a list, and it must be the same length as the entire Object. The attributes listed in the 
-//   TOC must be ordered the same as the attribute values in the Object.
-//   .
-//   For example, if you had an Axle Object with two attributes ("length" and "diameter"), 
-//   the TOC would have three elements within it: the Object type, and a default value and
-//   data type for both of the attributes. 
-//   ```openscad
-//   object = [
-//      // element 0: this list is the table-of-contents
-//      [
-//         ["Axle"],                // The Object's name
-//         ["length",   "i", 10],   // attribute 1: the 'length' attribute: an int, with a default of 10
-//         ["diameter", "i", 10]    // attribute 2: the 'diameter' attribute: an int, with a default of 10
-//      ], 
-//      undef,   // data element 1: the value of the 'length' attribute, currently unset 
-//      undef    // data element 2: the value of the 'diameter' attribute, currently unset 
-//      ];
-//   ``` 
-//   There are two attributes listed in the above example TOC, and there are two 
-//   attribute values in the Object. In this above example, the attributes are currently 
-//   unset, but they'll always be present. 
-//   .
-//   In general the functions in the TOC section aren't really functions you'd need in your 
-//   day-to-day modeling.
-//
-// Function: obj_toc_build()
-// Synopsis: Construct a TOC
-// Description: 
-//   Given an Object name `name`, an attribute-type set list `attrs`, and optionally an existing object to mutate from `mutate`,
-//   construct a table-of-contents (TOC) and return it. 
-// Arguments:
-//   name = The "name" of the object (think "classname"). No default. 
-//   attrs = The list of known attributes and their type for this object, eg: `["length=i", "style=s", "optional_attr=[]"]`. No default. 
-//   ---
-//   mutate = An existing Object of a similar `name` type on which to pre-set values. No default. 
+/// --------------------------------------------------------------------------------------------------------------------------------
+/// Subsection: Object Table-of-Contents Functions
+///   These are functions specific to interacting with an Object's Table-of-Contents (TOC). 
+///   ```openscad
+///   object = [
+///      TOC,
+///      value_1,
+///      value_N
+///      ];
+///   ```
+///   The TOC is a list of attributes that belong to the object, the attribute's data types, 
+///   and their default values. The TOC is the first element in the Object: 
+///   it's a list, and it must be the same length as the entire Object. The attributes listed in the 
+///   TOC must be ordered the same as the attribute values in the Object.
+///   .
+///   For example, if you had an Axle Object with two attributes ("length" and "diameter"), 
+///   the TOC would have three elements within it: the Object type, and a default value and
+///   data type for both of the attributes. 
+///   ```openscad
+///   object = [
+///      // element 0: this list is the table-of-contents
+///      [
+///         ["Axle"],                // The Object's name
+///         ["length",   "i", 10],   // attribute 1: the 'length' attribute: an int, with a default of 10
+///         ["diameter", "i", 10]    // attribute 2: the 'diameter' attribute: an int, with a default of 10
+///      ], 
+///      undef,   // data element 1: the value of the 'length' attribute, currently unset 
+///      undef    // data element 2: the value of the 'diameter' attribute, currently unset 
+///      ];
+///   ``` 
+///   There are two attributes listed in the above example TOC, and there are two 
+///   attribute values in the Object. In this above example, the attributes are currently 
+///   unset, but they'll always be present. 
+///   .
+///   In general the functions in the TOC section aren't really functions you'd need in your 
+///   day-to-day modeling.
+///
+/// Function: obj_toc_build()
+/// Synopsis: Construct a TOC
+/// Description: 
+///   Given an Object name `name`, an attribute-type set list `attrs`, and optionally an existing object to mutate from `mutate`,
+///   construct a table-of-contents (TOC) and return it. 
+/// Arguments:
+///   name = The "name" of the object (think "classname"). No default. 
+///   attrs = The list of known attributes and their type for this object, eg: `["length=i", "style=s", "optional_attr=[]"]`. No default. 
+///   ---
+///   mutate = An existing Object of a similar `name` type on which to pre-set values. No default. 
 function obj_toc_build(name, attrs, mutate) = 
     assert(_defined(attrs) || _defined(mutate), 
         "obj_toc_build: at least one of either attrs or mutate must be provided")
@@ -1053,56 +1069,55 @@ function obj_toc_build(name, attrs, mutate) =
     (obj_is_obj(mutate)) ? obj_toc(mutate) : new_toc;
 
 
-// Function: obj_toc()
-// Synopsis: Get an Object's TOC
-// Usage:
-//   toc = obj_toc(obj);
-// Description:
-//   Given an object `obj`, return that object's TOC as a list `toc`. 
-// Arguments:
-//   obj = An Object list. No default. 
+/// Function: obj_toc()
+/// Synopsis: Get an Object's TOC
+/// Usage:
+///   toc = obj_toc(obj);
+/// Description:
+///   Given an object `obj`, return that object's TOC as a list `toc`. 
+/// Arguments:
+///   obj = An Object list. No default. 
 function obj_toc(obj) = obj[0];
 
 
-// Function: obj_toc_get_type()
-// Synopsis: Get an Object's type from its TOC
-// Usage:
-//   type = obj_toc_get_type(obj);
-// Description: 
-//   Given an object, return its "type" (or "name") from its TOC. If there is no TOC, an error is raised. 
-// Arguments:
-//   obj = An Object list. No default. 
-// Example(NORENDER):
-//   obj = Object("ExampleObject", ["diameter=i=10"]);
-//   type = obj_toc_get_type(obj);
-//   // type == "ExampleObject"
+/// Function: obj_toc_get_type()
+/// Synopsis: Get an Object's type from its TOC
+/// Usage:
+///   type = obj_toc_get_type(obj);
+/// Description: 
+///   Given an object, return its "type" (or "name") from its TOC. If there is no TOC, an error is raised. 
+/// Arguments:
+///   obj = An Object list. No default. 
+/// Example(NORENDER):
+///   obj = Object("ExampleObject", ["diameter=i=10"]);
+///   type = obj_toc_get_type(obj);
+///   // type == "ExampleObject"
 function obj_toc_get_type(obj) = 
     (_defined(obj[0][0])) 
         ? obj[0][0] 
         : assert(false, str("obj_toc_get_type(): passed value has no object type:", obj));
 
 
-// Function: obj_toc_get_attributes()
-// Synopsis: Get the list of attributes
-// Usage:
-//   obj_toc_get_attributes(obj);
-// Description:
-//   Given an object, return its list of attributes. This may differ from the list of 
-//   attributes in the object's TOC, because of the TOC itself.
-//   .
-//   `obj_toc_get_attributes()` returns the TOC index as an attribute pair 
-//   of a literal "TOC", and an attribute type of `o`; should look like `["_toc_", "o"]`. 
-// Arguments:
-//   obj = An Object list. No default. 
-// Example(NORENDER):
-//   O_attrs = ["attr1=i", "attr2=s", "attr3=b=true"];
-//   obj = Object("Obj", O_attrs, [["attr2", "hello"], ["attr3", false]]);
-//   attrs = obj_toc_get_attributes(obj);
-//   // attrs == ECHO: [["_toc_", "o"], ["attr1", "i", undef], ["attr2", "s", undef], ["attr3", "b", true]]
-// Todo:
-//   I am not wild about the TOC being returned as an attribute
-// See also:
-//   obj_get_names()
+/// Function: obj_toc_get_attributes()
+/// Synopsis: Get the list of attributes
+/// Usage:
+///   obj_toc_get_attributes(obj);
+/// Description:
+///   Given an object, return its list of attributes. This may differ from the list of 
+///   attributes in the object's TOC, because of the TOC itself.
+///   .
+///   `obj_toc_get_attributes()` returns the TOC index as an attribute pair 
+///   of a literal "TOC", and an attribute type of `o`; should look like `["_toc_", "o"]`. 
+/// Arguments:
+///   obj = An Object list. No default. 
+/// Example(NORENDER):
+///   O_attrs = ["attr1=i", "attr2=s", "attr3=b=true"];
+///   obj = Object("Obj", O_attrs, [["attr2", "hello"], ["attr3", false]]);
+///   attrs = obj_toc_get_attributes(obj);
+///   // attrs == ECHO: [["_toc_", "o"], ["attr1", "i", undef], ["attr2", "s", undef], ["attr3", "b", true]]
+/// Todo:
+///   I am not wild about the TOC being returned as an attribute
+/// See Also: obj_get_names()
 function obj_toc_get_attributes(obj) = 
     list_insert( 
         slice(obj[0], 1),
@@ -1110,175 +1125,175 @@ function obj_toc_get_attributes(obj) =
     );
 
 
-// Function: obj_toc_get_attr_names()
-// Synopsis: Get the list of attribute names
-// Usage:
-//   names = obj_toc_get_attr_names(obj);
-// Description:
-//   Given an object `obj`, return its attribute names as a list `names`. 
-// Arguments:
-//   obj = An Object list. No default.
-// Example(NORENDER):
-//   obj = Object("ExampleObject", ["attr1=i", "attr2=i", "attr3=i"]);
-//   names = obj_toc_get_attr_names(obj);
-//   // names == ["_toc_", "attr1", "attr2", "attr3"]
-// Todo: 
-//   honestly I'm not wild about the TOC being returned in the list of attributes. 
+/// Function: obj_toc_get_attr_names()
+/// Synopsis: Get the list of attribute names
+/// Usage:
+///   names = obj_toc_get_attr_names(obj);
+/// Description:
+///   Given an object `obj`, return its attribute names as a list `names`. 
+/// Arguments:
+///   obj = An Object list. No default.
+/// Example(NORENDER):
+///   obj = Object("ExampleObject", ["attr1=i", "attr2=i", "attr3=i"]);
+///   names = obj_toc_get_attr_names(obj);
+///   // names == ["_toc_", "attr1", "attr2", "attr3"]
+/// Todo: 
+///   honestly I'm not wild about the TOC being returned in the list of attributes. 
 function obj_toc_get_attr_names(obj) = [ for (i=obj_toc_get_attributes(obj)) i[0] ];
 
 
-// Function: obj_toc_get_attr_types()
-// Synopsis: Get the list of attribute types
-// Usage:
-//   types = obj_toc_get_attr_types(obj);
-// Description:
-//   Given an object `obj`, return its attributes' types as a list `types`. Types are 
-//   returned in the same order and index as their corresponding attributes. 
-// Arguments:
-//   obj = An Object list. No default.
-// Example(NORENDER):
-//   obj = Object("ExampleObj", ["attr1=o", "attr2=i", "attr3=i"]);
-//   types = obj_toc_get_attr_types(obj);
-//   // types == ["o", "i", "i"];
-// Todo: 
-//   honestly I'm not even really sure *when* you'd use this.
+/// Function: obj_toc_get_attr_types()
+/// Synopsis: Get the list of attribute types
+/// Usage:
+///   types = obj_toc_get_attr_types(obj);
+/// Description:
+///   Given an object `obj`, return its attributes' types as a list `types`. Types are 
+///   returned in the same order and index as their corresponding attributes. 
+/// Arguments:
+///   obj = An Object list. No default.
+/// Example(NORENDER):
+///   obj = Object("ExampleObj", ["attr1=o", "attr2=i", "attr3=i"]);
+///   types = obj_toc_get_attr_types(obj);
+///   // types == ["o", "i", "i"];
+/// Todo: 
+///   honestly I'm not even really sure *when* you'd use this.
 function obj_toc_get_attr_types(obj) = [ for (i=obj_toc_get_attributes(obj)) i[1] ];
 
 
-// Function: obj_toc_get_attr_defaults()
-// Synopsis: Get the list of attribute default values
-// Usage:
-//   defaults = obj_toc_get_attr_defaults(obj);
-// Description: 
-//   Given an object `obj`, return its attributes' default values as a list `defaults`. 
-//   Default values are returned in the same order and index as their corresponding 
-//   attribute names.
-// Arguments:
-//   obj = An Object list. No default.
-// Example(NORENDER):
-//   obj = Object("ExampleObj", ["a1=i=20", "a2=i=10"]);
-//   values = obj_toc_get_attr_defaults(obj);
-//   // values == [20, 10];
-// Todo: 
-//   confirm, clarify example
+/// Function: obj_toc_get_attr_defaults()
+/// Synopsis: Get the list of attribute default values
+/// Usage:
+///   defaults = obj_toc_get_attr_defaults(obj);
+/// Description: 
+///   Given an object `obj`, return its attributes' default values as a list `defaults`. 
+///   Default values are returned in the same order and index as their corresponding 
+///   attribute names.
+/// Arguments:
+///   obj = An Object list. No default.
+/// Example(NORENDER):
+///   obj = Object("ExampleObj", ["a1=i=20", "a2=i=10"]);
+///   values = obj_toc_get_attr_defaults(obj);
+///   // values == [20, 10];
+/// Todo: 
+///   confirm, clarify example
 function obj_toc_get_attr_defaults(obj) = [ for (i=obj_toc_get_attributes(obj)) i[2] ];
 
 
-// Function: obj_toc_attr_len()
-// Synopsis: Get the number of attributes in an Object
-// Usage:
-//   num = obj_toc_attr_len(obj);
-// Description:
-//   Given an object `obj`, return the number of attributes defined for that object `num`. 
-// Arguments:
-//   obj = An Object list. No default.
-// Todo: 
-//   I'm not super wild about the TOC being considered in this length (wait... *is* it being considered?)
+/// Function: obj_toc_attr_len()
+/// Synopsis: Get the number of attributes in an Object
+/// Usage:
+///   num = obj_toc_attr_len(obj);
+/// Description:
+///   Given an object `obj`, return the number of attributes defined for that object `num`. 
+/// Arguments:
+///   obj = An Object list. No default.
+/// Todo: 
+///   I'm not super wild about the TOC being considered in this length (wait... *is* it being considered?)
 function obj_toc_attr_len(obj) = len(obj[0]) - 1;
 
 
-// Function: obj_toc_get_attr_type_by_name()
-// Synopsis: Get a data type for a particular attribute by name
-// Usage:
-//   type = obj_toc_get_attr_type_by_name(obj, name);
-// Description:
-//   Given an object `obj` and an attribute name `name`, return the attribute data type 
-//   expected for that attribute. 
-//   Valid data types are listed in `ATTRIBUTE_DATA_TYPES`.
-// Arguments:
-//   obj = An Object list. No default. 
-//   name = The attribute name for whose data type you want. No default.
-// Example(NORENDER):
-//   obj = Object("ExampleObj", ["a1=i=10", "a2=i=10"]);
-//   type = obj_toc_get_attr_type_by_name(obj, "a1");
-//   // type == "i"
+/// Function: obj_toc_get_attr_type_by_name()
+/// Synopsis: Get a data type for a particular attribute by name
+/// Usage:
+///   type = obj_toc_get_attr_type_by_name(obj, name);
+/// Description:
+///   Given an object `obj` and an attribute name `name`, return the attribute data type 
+///   expected for that attribute. 
+///   Valid data types are listed in `ATTRIBUTE_DATA_TYPES`.
+/// Arguments:
+///   obj = An Object list. No default. 
+///   name = The attribute name for whose data type you want. No default.
+/// Example(NORENDER):
+///   obj = Object("ExampleObj", ["a1=i=10", "a2=i=10"]);
+///   type = obj_toc_get_attr_type_by_name(obj, "a1");
+///   // type == "i"
 function obj_toc_get_attr_type_by_name(obj, name) = obj_toc_get_attr_type_by_id(obj, obj_toc_attr_id_by_name(obj, name)); 
 
 
-// Function: obj_toc_get_attr_type_by_id()
-// Synopsis: Get a data type for a particular attribute by ID 
-// Usage:
-//   type = obj_toc_get_attr_type_by_id(obj, id);
-// Description:
-//   Given an object `obj` and a numerical attribute ID `id`, return the attribute data type 
-//   expected for that attribute as `type` 
-//   Valid data types are listed in `ATTRIBUTE_DATA_TYPES`.
-// Arguments:
-//   obj = An Object list. No default. 
-//   id = The attribute ID for whose data type you want. No default.
-// Example(NORENDER):
-//   obj = Object("ExampleObj", ["a1=i=10", "a2=i=10"]);
-//   type = obj_toc_get_attr_type_by_id(obj, 1);
-//   // type == "i"
+/// Function: obj_toc_get_attr_type_by_id()
+/// Synopsis: Get a data type for a particular attribute by ID 
+/// Usage:
+///   type = obj_toc_get_attr_type_by_id(obj, id);
+/// Description:
+///   Given an object `obj` and a numerical attribute ID `id`, return the attribute data type 
+///   expected for that attribute as `type` 
+///   Valid data types are listed in `ATTRIBUTE_DATA_TYPES`.
+/// Arguments:
+///   obj = An Object list. No default. 
+///   id = The attribute ID for whose data type you want. No default.
+/// Example(NORENDER):
+///   obj = Object("ExampleObj", ["a1=i=10", "a2=i=10"]);
+///   type = obj_toc_get_attr_type_by_id(obj, 1);
+///   // type == "i"
 function obj_toc_get_attr_type_by_id(obj, id) = obj_toc_get_attr_types(obj)[ id ];
 
 
-// Function: obj_toc_get_attr_default_by_name()
-// Synopsis: Get an attribute's default value by name
-// Usage:
-//   default = obj_toc_get_attr_default_by_name(obj, name);
-// Description:
-//   Given an object `obj` and an attribute name `name`, return the attribute's default value 
-//   expected for that attribute as `default`.
-// Arguments:
-//   obj = An Object list. No default.
-//   name = The attribute name for whose default value you want. No default.
-// Example(NORENDER):
-//   obj = Object("ExampleObj", ["a1=i=10", "a2=i=20"]);
-//   default = obj_toc_get_attr_default_by_name(obj, "a1");
-//   // default == 10
-// Todo: 
-//   confirm example
+/// Function: obj_toc_get_attr_default_by_name()
+/// Synopsis: Get an attribute's default value by name
+/// Usage:
+///   default = obj_toc_get_attr_default_by_name(obj, name);
+/// Description:
+///   Given an object `obj` and an attribute name `name`, return the attribute's default value 
+///   expected for that attribute as `default`.
+/// Arguments:
+///   obj = An Object list. No default.
+///   name = The attribute name for whose default value you want. No default.
+/// Example(NORENDER):
+///   obj = Object("ExampleObj", ["a1=i=10", "a2=i=20"]);
+///   default = obj_toc_get_attr_default_by_name(obj, "a1");
+///   // default == 10
+/// Todo: 
+///   confirm example
 function obj_toc_get_attr_default_by_name(obj, name) = obj_toc_get_attr_default_by_id(obj, obj_toc_attr_id_by_name(obj, name));
 
 
-// Function: obj_toc_get_attr_default_by_id()
-// Synopsis: Get an attribute's default value by ID
-// Usage:
-//   default = obj_toc_get_attr_default_by_id(obj, id);
-// Description:
-//   Given an object `obj` and a numerical attribute ID `id`, return the attribute's default value
-//   expected for that attribute as `default`.
-// Arguments:
-//   obj = An Object list. No default.
-//   id = The attribute id for whose default value you want. No default.
-// Example(NORENDER):
-//   obj = Object("ExampleObj", ["a1=i=10", "a2=i=20"]);
-//   default = obj_toc_get_attr_default_by_id(obj, 2);
-//   // default == 20
-// Todo: 
-//   confirm, clarify example
+/// Function: obj_toc_get_attr_default_by_id()
+/// Synopsis: Get an attribute's default value by ID
+/// Usage:
+///   default = obj_toc_get_attr_default_by_id(obj, id);
+/// Description:
+///   Given an object `obj` and a numerical attribute ID `id`, return the attribute's default value
+///   expected for that attribute as `default`.
+/// Arguments:
+///   obj = An Object list. No default.
+///   id = The attribute id for whose default value you want. No default.
+/// Example(NORENDER):
+///   obj = Object("ExampleObj", ["a1=i=10", "a2=i=20"]);
+///   default = obj_toc_get_attr_default_by_id(obj, 2);
+///   // default == 20
+/// Todo: 
+///   confirm, clarify example
 function obj_toc_get_attr_default_by_id(obj, id) = obj_toc_get_attr_defaults(obj)[ id ];
 
 
-// Function: obj_toc_attr_id_by_name()
-// Synopsis: Translate an attribute's name into an ID
-// Usage:
-//   id = obj_addr_id_by_name(object, name);
-// Description:
-//   Tranlate function to convert attribute names to list index in the object's attribute TOC. 
-//   Given an object `obj` with a valid TOC, and an attribute name `name`, looks up the `name` within the TOC 
-//   and returns the expected index number of the attribute within the object list. 
-//   .
-//   Functionally this is the opposite of `obj_toc_attr_id_by_name()`. 
-// Arguments:
-//   obj = An Object list. No default.
-//   name = The attribute name for whose default value you want. No default.
-// Continues:
-//   It is an error to specify a `name` that isn't present within the TOC. It is an error to specify 
-//   an Object without a valid TOC, or to pass a non-Object value as `obj` (such as a number).
-// Example(NORENDER):
-//   axle = Axle([["diameter", 10], ["length", 30]]);
-//   // axle == [["Axle", ["diameter", "i"], ["length", "i"]], 10, 30];
-//   id = obj_toc_attr_id_by_name(axle, "diameter");
-//   // id == 1
-// Example(NORENDER):
-//   axle = Axle([]);
-//   // axle == [["Axle", ["diameter", "i"], ["length", "i"]], undef, undef];
-//   id = obj_toc_attr_id_by_name(axle, "not-found");
-//   // error is thrown
-// EXTERNAL - 
-//   is_list() (BOSL2);
+/// Function: obj_toc_attr_id_by_name()
+/// Synopsis: Translate an attribute's name into an ID
+/// Usage:
+///   id = obj_addr_id_by_name(object, name);
+/// Description:
+///   Tranlate function to convert attribute names to list index in the object's attribute TOC. 
+///   Given an object `obj` with a valid TOC, and an attribute name `name`, looks up the `name` within the TOC 
+///   and returns the expected index number of the attribute within the object list. 
+///   .
+///   Functionally this is the opposite of `obj_toc_attr_id_by_name()`. 
+/// Arguments:
+///   obj = An Object list. No default.
+///   name = The attribute name for whose default value you want. No default.
+/// Continues:
+///   It is an error to specify a `name` that isn't present within the TOC. It is an error to specify 
+///   an Object without a valid TOC, or to pass a non-Object value as `obj` (such as a number).
+/// Example(NORENDER):
+///   axle = Axle([["diameter", 10], ["length", 30]]);
+///   // axle == [["Axle", ["diameter", "i"], ["length", "i"]], 10, 30];
+///   id = obj_toc_attr_id_by_name(axle, "diameter");
+///   // id == 1
+/// Example(NORENDER):
+///   axle = Axle([]);
+///   // axle == [["Axle", ["diameter", "i"], ["length", "i"]], undef, undef];
+///   id = obj_toc_attr_id_by_name(axle, "not-found");
+///   // error is thrown
+/// EXTERNAL - 
+///   is_list() (BOSL2);
 function obj_toc_attr_id_by_name(obj, name) = 
     assert(is_list(obj[0]), 
         str("obj_toc_attr_id_by_name(): first item in obj ",
@@ -1296,34 +1311,34 @@ function obj_toc_attr_id_by_name(obj, name) =
     id;
 
 
-// Function: obj_toc_attr_name_by_id()
-// Synopsis: Translate an attribute's ID into a name
-// Usage:
-//   name = obj_toc_attr_name_by_id(object, id);
-// Description:
-//   Translate function to convert attribute IDs (indexed positions within the object list) to the object 
-//   attribute's name within the object's TOC. Given an object with a valid TOC `obj`, and a numerical attribute
-//   ID `id`, returns the name at that `id` list index from the object's TOC as `name`.
-//   .
-//   Functionally this is the opposite of `obj_toc_attr_id_by_name()`. 
-// Arguments:
-//   obj = An Object list. No default.
-//   id = The attribute id for whose default value you want. No default.
-// Continues:
-//   It is an error to specify an `id` that exceeds the attribute length within the TOC. It is an error to specify 
-//   an Object without a valid TOC, or to pass a non-Object value as `obj` (such as a number).
-// Example(NORENDER):
-//   axle = Axle([["diameter", 10], ["length", 30]]);
-//   // axle == [["Axle", "diameter", "length"], 10, 30];
-//   name = obj_toc_attr_name_by_id(axle, 1);
-//   // name == "diameter"
-// Example(NORENDER):
-//   axle = Axle([]);
-//   // axle == [["Axle", "diameter", "length"], undef, undef];
-//   name = obj_toc_attr_name_by_id(axle, 3);
-//   // error is thrown
-// EXTERNAL - 
-//   is_list() (BOSL2); 
+/// Function: obj_toc_attr_name_by_id()
+/// Synopsis: Translate an attribute's ID into a name
+/// Usage:
+///   name = obj_toc_attr_name_by_id(object, id);
+/// Description:
+///   Translate function to convert attribute IDs (indexed positions within the object list) to the object 
+///   attribute's name within the object's TOC. Given an object with a valid TOC `obj`, and a numerical attribute
+///   ID `id`, returns the name at that `id` list index from the object's TOC as `name`.
+///   .
+///   Functionally this is the opposite of `obj_toc_attr_id_by_name()`. 
+/// Arguments:
+///   obj = An Object list. No default.
+///   id = The attribute id for whose default value you want. No default.
+/// Continues:
+///   It is an error to specify an `id` that exceeds the attribute length within the TOC. It is an error to specify 
+///   an Object without a valid TOC, or to pass a non-Object value as `obj` (such as a number).
+/// Example(NORENDER):
+///   axle = Axle([["diameter", 10], ["length", 30]]);
+///   // axle == [["Axle", "diameter", "length"], 10, 30];
+///   name = obj_toc_attr_name_by_id(axle, 1);
+///   // name == "diameter"
+/// Example(NORENDER):
+///   axle = Axle([]);
+///   // axle == [["Axle", "diameter", "length"], undef, undef];
+///   name = obj_toc_attr_name_by_id(axle, 3);
+///   // error is thrown
+/// EXTERNAL - 
+///   is_list() (BOSL2); 
 function obj_toc_attr_name_by_id(obj, id) = 
     assert(is_list(obj[0]), 
         str("obj_toc_attr_name_by_id(): first item in obj expected ",

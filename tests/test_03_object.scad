@@ -12,9 +12,9 @@ function gen_test_type_object() =
     obj_accessor_set(_obj, "object", nv=_obj);
 
 
-module test_obj_build_toc() {
+module test_obj_toc_build() {
     // test string-based paired creation
-    toc = obj_build_toc("Test", ["one=i", "two=s"], []);
+    toc = obj_toc_build("Test", ["one=i", "two=s"], []);
     assert( obj_is_obj( [toc, undef, undef] ));
 
     assert( obj_toc_get_type([toc, undef, undef]) == "Test" );
@@ -22,18 +22,18 @@ module test_obj_build_toc() {
     assert( obj_toc_get_attr_names([toc, undef, undef]) == ["_toc_", "one", "two"] );
 
     // test mutate TOC propgation
-    mtoc = obj_build_toc("Test", ["three=i", "four=s"], [toc, undef, undef] );
+    mtoc = obj_toc_build("Test", ["three=i", "four=s"], [toc, undef, undef] );
     assert( obj_toc_get_type([mtoc, undef, undef]) == "Test" );
     assert( obj_toc_attr_len([mtoc, undef, undef]) == 2 );
     assert( obj_toc_get_attr_names([mtoc, undef, undef]) == ["_toc_", "one", "two"], toc);
 
     // test list-based paired TOC creation
-    ptoc = obj_build_toc("TestP", [["five", "i"], ["six", "s"]], []);
+    ptoc = obj_toc_build("TestP", [["five", "i"], ["six", "s"]], []);
     assert( obj_toc_get_type([ptoc, undef, undef]) == "TestP" );
     assert( obj_toc_attr_len([ptoc, undef, undef]) == 2 );
     assert( obj_toc_get_attr_names([ptoc, undef, undef]) == ["_toc_", "five", "six"] );
 }
-test_obj_build_toc();
+test_obj_toc_build();
 
 
 module test_test_type_obj() {
