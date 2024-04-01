@@ -694,20 +694,6 @@ function obj_accessor_get(obj, name, nv=undef, default=undef, _consider_toc_defa
 //   obj = Object("ExampleObj", ["a1=i", "a2=i"], ["a1", 30]);
 //   new_obj = obj_accessor_set(obj, "a1", nv=20);
 //   // new_obj's `a1` attribute is now 20
-// Example(NORENDER): providing a class- and attribute-specific "glue" write-only accessor:
-//   function set_axle_length(axle, nv) = obj_accessor_set(axle, "length", nv);
-//   // ..
-//   axle = Axle([["diameter", 10], ["length", 30]]);
-//   new_axle = set_axle_length(axle, 40);
-//   // new_axle == [["Axle", "diameter", "length"], 10, 40];
-// Example(NORENDER): gotchas when setting undefined values with `obj_accessor()`:
-//   // Setting no value in `nv` will *not* do what you want!
-//   function set_axle_length(axle, nv=undef) = obj_accessor(axle, "length", nv);
-//   axle = Axle([["diameter", 10], ["length", 30]]);
-//   new_axle = set_axle_length(axle);
-//   // new_axle == 30  //<--- This is the `length` value, NOT a new object. 
-//   // Because the `nv` option wasn't provided, the call arrived into `obj_accessor()` as `undef`, and 
-//   // was treated as a "get". 
 // See Also: obj_accessor()
 function obj_accessor_set(obj, name, nv, default=undef) = 
     assert(_defined(name), str("obj_accessor_set(): attribute name must ",
@@ -1359,16 +1345,14 @@ function obj_toc_get_attr_default_by_id(obj, id) = obj_toc_get_attr_defaults(obj
 /// Continues:
 ///   It is an error to specify a `name` that isn't present within the TOC. It is an error to specify 
 ///   an Object without a valid TOC, or to pass a non-Object value as `obj` (such as a number).
-/// Example(NORENDER):
-///   axle = Axle([["diameter", 10], ["length", 30]]);
-///   // axle == [["Axle", ["diameter", "i"], ["length", "i"]], 10, 30];
-///   id = obj_toc_attr_id_by_name(axle, "diameter");
+/// Example(NORENDER): getting an attribute's ID from its name:
+///   obj = Object("ExampleObj", ["a1=i", "a2=i"], ["a1", 10, "a2", 30]);
+///   id = obj_toc_attr_id_by_name(obj, "a1");
 ///   // id == 1
-/// Example(NORENDER):
-///   axle = Axle([]);
-///   // axle == [["Axle", ["diameter", "i"], ["length", "i"]], undef, undef];
-///   id = obj_toc_attr_id_by_name(axle, "not-found");
-///   // error is thrown
+/// Example(NORENDER): requesting an attribute ID for an attribute name that doesn't exist yields an error:
+///   obj = Object("ExampleObj", ["a1=i", "a2=i"]);
+///   id = obj_toc_attr_id_by_name(obj, "not-found");
+///   // an error is thrown
 /// EXTERNAL - 
 ///   is_list() (BOSL2);
 function obj_toc_attr_id_by_name(obj, name) = 
@@ -1404,15 +1388,13 @@ function obj_toc_attr_id_by_name(obj, name) =
 /// Continues:
 ///   It is an error to specify an `id` that exceeds the attribute length within the TOC. It is an error to specify 
 ///   an Object without a valid TOC, or to pass a non-Object value as `obj` (such as a number).
-/// Example(NORENDER):
-///   axle = Axle([["diameter", 10], ["length", 30]]);
-///   // axle == [["Axle", "diameter", "length"], 10, 30];
-///   name = obj_toc_attr_name_by_id(axle, 1);
-///   // name == "diameter"
-/// Example(NORENDER):
-///   axle = Axle([]);
-///   // axle == [["Axle", "diameter", "length"], undef, undef];
-///   name = obj_toc_attr_name_by_id(axle, 3);
+/// Example(NORENDER): translating an attribute ID into the Object's attribute name:
+///   obj = Object("ExampleObj", ["a1=i", "a2=i"], ["a1", 10, "a2", 30]);
+///   name = obj_toc_attr_name_by_id(obj, 1);
+///   // name == "a1"
+/// Example(NORENDER): translating an attribute ID into the Object's attribute name for an ID that doesn't exist yields an error:
+///   obj = Object("ExampleObj", ["a1=i", "a2=i"], ["a1", 10, "a2", 30]);
+///   name = obj_toc_attr_name_by_id(obj, 3);
 ///   // error is thrown
 /// EXTERNAL - 
 ///   is_list() (BOSL2); 
