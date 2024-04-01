@@ -88,7 +88,7 @@ include <BOSL2/std.scad>
 //   name = The "name" of the object (think "classname"). No default. 
 //   attrs = The list of known attributes, and optionally their type and default for this object. No default. 
 //   ---
-//   vlist = Variable list of attributes and values: `[ ["length", 10], ["style", "none"] ]`; **or,** a list of running attribute value pairing: `["length", 10, "style", "none"]`. Default: `[]` (which will produce an Object with no values).
+//   vlist = Variable list of attributes and values: `[ ["a1", 10], ["a2", "none"] ]`; **or,** a list of running attribute value pairing: `["a1", 10, "a2", "none"]`. Default: `[]` (which will produce an Object with no values).
 //   mutate = An existing Object of a similar `name` type on which to pre-set values. Default: `[]`
 // Continues:
 //   `Object()` returns a list that should be treated as an opaque object: reading values directly 
