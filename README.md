@@ -10,13 +10,13 @@ This library was made to address a set number of issues within OpenSCAD:
 5. **providing default values when none are set.** When you've got a wide variety of arguments grouped together for model reuse, you sometimes (often?) get an attribute that changes occasionally, but not always. `openscad_objects` provides a default value facility for attributes within an object, giving you the flexibility when you need it, but reducing repetitive value declaration when you don't. 
 
 ## Howto
-See [HOWTO](HOWTO) for a quick, high-level guide on implementing Objects into your OpenSCAD module
+See [HOWTO](https://github.com/jon-gilbert/openscad_objects/wiki/HOWTO) for a quick, high-level guide on implementing Objects into your OpenSCAD module
 
 ## Reference Documentation
-All of the object functions are documented within [object_common_functions.scad](https://github.com/jon-gilbert/openscad_objects/wiki/object_common_functions.scad), with indexing at [AlphaIndex](AlphaIndex) & [TOC](TOC).
+All of the object functions are documented within [object_common_functions.scad](https://github.com/jon-gilbert/openscad_objects/wiki/object_common_functions.scad), with indexing at [AlphaIndex](https://github.com/jon-gilbert/openscad_objects/wiki/AlphaIndex) & [TOC](https://github.com/jon-gilbert/openscad_objects/wiki/TOC).
 
 ## Caveats
-As limitations are documented, you'll find them under [Caveats & Limitations](Caveats-&-Limitations).
+As limitations are documented, you'll find them under [Caveats & Limitations](https://github.com/jon-gilbert/openscad_objects/wiki/Caveats-&-Limitations).
 
 ## Installing
 Until we get packaging up and running here, the simpliest way to install this is to download the most recent zip from Github, and copy the `object_common_functions.scad` file into your OpenSCAD library directory. 
