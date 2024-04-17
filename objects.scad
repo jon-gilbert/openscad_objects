@@ -13,10 +13,7 @@
 include <BOSL2/std.scad>
 
 
-// Section: Object Functions
-//   .
-//
-// Subsection: Base Object Functions & Usage
+// Section: Base Object Functions & Usage
 //   These functions assist the creating and usage of object-like lists: "Objects".
 //   .
 //   Objects have two basic parts: a list of attributes, their types, and default 
@@ -487,7 +484,7 @@ function obj_get_defaults(obj) = obj_toc_get_attr_defaults(obj);
 
 
 // ------------------------------------------------------------------------------------------------------------
-// Subsection: Object Accessors
+// Section: Object Accessors
 //   These are the Object attribute accessors; functions that "get" and "set" the 
 //   attribute values in the Object. 
 //   .
@@ -735,7 +732,7 @@ function obj_accessor_unset(obj, name) =
     list_set(obj, obj_toc_attr_id_by_name(obj, name), undef);
 
 
-// Subsection: Managing Lists of Objects
+// Section: Managing Lists of Objects
 //   These are functions to help manage lists or collections of Objects. In most cases,
 //   standard list manipulation functions work fine, but when you need to select or act
 //   on a subset of Objects based on their attribute values, turn here.
@@ -960,7 +957,7 @@ function obj_list_debug_obj(obj_list) = [ for (obj=obj_list) obj_debug_obj(obj) 
 
 
 // ------------------------------------------------------------------------------------------------------------
-// Subsection: Object Attribute Data Types
+// Section: Object Attribute Data Types
 //   
 // Constant: ATTRIBUTE_DATA_TYPES
 // Synopsis: Known data types
@@ -1073,7 +1070,7 @@ function test_value_type(type_id, value) =
 
 
 /// --------------------------------------------------------------------------------------------------------------------------------
-/// Subsection: Object Table-of-Contents Functions
+/// Section: Object Table-of-Contents Functions
 ///   These are functions specific to interacting with an Object's Table-of-Contents (TOC). 
 ///   ```openscad
 ///   object = [
