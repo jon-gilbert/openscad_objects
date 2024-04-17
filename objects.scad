@@ -1,4 +1,4 @@
-// LibFile: object_common_functions.scad
+// LibFile: objects.scad
 //   Functions for creating and accessing object-like lists. 
 //   .
 //   **Note:** throughout this LibFile, we refer to things as Objects.
@@ -8,7 +8,7 @@
 //
 // FileSummary: Functions for creating and accessing object-like lists.
 // Includes:
-//   include <object_common_functions.scad>
+//   include <openscad_objects/objects.scad>
 
 include <BOSL2/std.scad>
 

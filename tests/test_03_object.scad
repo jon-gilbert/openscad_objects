@@ -1,6 +1,6 @@
 
 
-include <../object_common_functions.scad>
+include <openscad_objects/objects.scad>
 
 
 function gen_test_type_object() = 

@@ -1,4 +1,5 @@
-include <../object_common_functions.scad>
+
+include <openscad_objects/objects.scad>
 
 function TestObj(vlist=[], mutate=[]) = Object("TestObj", ["aint=i", "bint=i=1", "cstr=s", "dint=i", "estr=s"], vlist=vlist, mutate=mutate);
 

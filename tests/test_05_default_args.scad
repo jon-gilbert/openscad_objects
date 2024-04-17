@@ -1,4 +1,5 @@
-include <../object_common_functions.scad>
+
+include <openscad_objects/objects.scad>
 
 module test_obj_default_args() {
     function V(vlist=[], mutate=[]) = Object( "V", 

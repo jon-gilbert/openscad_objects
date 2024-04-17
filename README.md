@@ -18,10 +18,17 @@ All of the object functions are documented within [object_common_functions.scad]
 ## Caveats
 As limitations are documented, you'll find them under [Caveats & Limitations](https://github.com/jon-gilbert/openscad_objects/wiki/Caveats-&-Limitations).
 
-## Installing
-Until we get packaging up and running here, the simpliest way to install this is to download the most recent zip from Github, and copy the `object_common_functions.scad` file into your OpenSCAD library directory. 
+# Installing
+1. Download the most recent release of `openscad_objects` from https://github.com/jon-gilbert/openscad_objects/releases/latest 
+2. unpack the zipfile or tarball. Inside will be a directory, named `openscad_objects-0.8` (where `0.8` is the version of the release). Extract that folder to your OpenSCAD library directory
+3. Rename that release directory from `openscad_objects-0.8` to just `openscad_objects`
 
-You'll need the most-excellent BOSL2 framework to get this working; see https://github.com/revarbat/BOSL2 for instructions on how to download and incorporate it. 
+## Required Libraries
+You'll need the BOSL2 framework to get this working; see https://github.com/BelfrySCAD/BOSL2/ for instructions on how to download and incorporate it. 
 
-## "I need help!"
+# "I need help!"
 A lot of this project might be generously considered "works for me", and I'm entirely not sure what'll happen when you use it for *you*. That's ok! If something doesn't seem to work right, a GitHub issue is perhaps the best way to let me know. 
+
+# Author & License
+This library is copyright 2022-2024 Jonathan Gilbert <jong@jong.org>, and released for use under the [MIT License](LICENSE.md).
+

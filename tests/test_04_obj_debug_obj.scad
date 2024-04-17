@@ -1,5 +1,5 @@
 
-include <../object_common_functions.scad>
+include <openscad_objects/objects.scad>
 
 module test_obj_debug_obj() {
     // this ONLY tests if obj_debug_obj() returns scucessfully. 
